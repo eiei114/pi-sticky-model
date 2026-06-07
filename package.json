@@ -1,6 +1,6 @@
 {
   "name": "pi-sticky-model",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "description": "Pi extension that keeps your selected model across /new, /resume, and /fork within the same session. Model resets on Ctrl+C.",
   "type": "module",
   "license": "MIT",
