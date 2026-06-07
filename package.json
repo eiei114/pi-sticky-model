@@ -1,31 +1,30 @@
 {
-  "name": "pi-extension-template",
+  "name": "pi-sticky-model",
   "version": "0.1.2",
-  "description": "Template for building Pi packages with extensions, Agent Skills, prompts, and themes.",
+  "description": "Pi extension that keeps your selected model across /new, /resume, and /fork within the same session. Model resets on Ctrl+C.",
   "type": "module",
   "license": "MIT",
-  "author": "YOUR_NAME",
+  "author": "Keisu",
   "keywords": [
     "pi-package",
     "pi",
-    "agent-skill",
+    "extension",
+    "model",
+    "session",
+    "sticky",
     "typescript"
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/OWNER/REPO.git"
+    "url": "git+https://github.com/eiei114/pi-sticky-model.git"
   },
   "bugs": {
-    "url": "https://github.com/OWNER/REPO/issues"
+    "url": "https://github.com/eiei114/pi-sticky-model/issues"
   },
-  "homepage": "https://github.com/OWNER/REPO#readme",
+  "homepage": "https://github.com/eiei114/pi-sticky-model#readme",
   "files": [
     "extensions/",
     "lib/",
-    "skills/",
-    "prompts/",
-    "themes/",
-    "docs/",
     "README.md",
     "LICENSE",
     "CHANGELOG.md"
@@ -39,15 +38,6 @@
   "pi": {
     "extensions": [
       "./extensions"
-    ],
-    "skills": [
-      "./skills"
-    ],
-    "prompts": [
-      "./prompts"
-    ],
-    "themes": [
-      "./themes"
     ]
   },
   "publishConfig": {
