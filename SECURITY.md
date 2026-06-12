@@ -6,7 +6,9 @@ Only the latest published version receives security fixes.
 
 ## Reporting a vulnerability
 
-Open a private security advisory on GitHub, or contact the maintainer by the preferred channel listed in the repository profile.
+Report vulnerabilities through [GitHub Security Advisories](https://github.com/eiei114/pi-sticky-model/security/advisories/new).
+
+You can also open a [private security issue](https://github.com/eiei114/pi-sticky-model/security/policy).
 
 Please include:
 
