@@ -8,7 +8,7 @@ Only the latest published version receives security fixes.
 
 Report vulnerabilities through [GitHub Security Advisories](https://github.com/eiei114/pi-sticky-model/security/advisories/new).
 
-You can also open a [private security issue](https://github.com/eiei114/pi-sticky-model/security/policy).
+You can also open a [private security issue](https://github.com/eiei114/pi-sticky-model/security/advisories/new).
 
 Please include:
 
