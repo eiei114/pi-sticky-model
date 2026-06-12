@@ -30,7 +30,7 @@ The workflow skips `name@version` if that exact package version already exists o
 
 ## GitHub Actions requirements
 
-- `permissions: id-token: write`
+- `permissions: contents: read, id-token: write`
 - GitHub-hosted runner
 - Node.js 24, so the release job uses a current npm CLI for Trusted Publishing
 - No `NPM_TOKEN`
