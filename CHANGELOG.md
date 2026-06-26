@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 This project follows semantic versioning.
 
+## [0.2.1] - 2026-06-27
+
+### Changed
+
+- README aligned with the current Pi OSS extension template: npm version/downloads badges, shipped `Package contents`, and explicit `npm pack --dry-run` guidance via `npm run pack:check`.
+
 ## [0.2.0] - 2026-06-08
 
 ### Added
