@@ -2,6 +2,8 @@
 
 [![CI](https://github.com/eiei114/pi-sticky-model/actions/workflows/ci.yml/badge.svg)](https://github.com/eiei114/pi-sticky-model/actions/workflows/ci.yml)
 [![Publish](https://github.com/eiei114/pi-sticky-model/actions/workflows/publish.yml/badge.svg)](https://github.com/eiei114/pi-sticky-model/actions/workflows/publish.yml)
+[![npm version](https://img.shields.io/npm/v/pi-sticky-model.svg)](https://www.npmjs.com/package/pi-sticky-model)
+[![npm downloads](https://img.shields.io/npm/dm/pi-sticky-model.svg)](https://www.npmjs.com/package/pi-sticky-model)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Pi package](https://img.shields.io/badge/pi-package-purple.svg)](https://pi.dev/packages)
 [![Trusted Publishing](https://img.shields.io/badge/npm-Trusted%20Publishing-blue.svg)](docs/release.md)
@@ -36,7 +38,7 @@ pi install npm:pi-sticky-model
 Pin a specific version when you want reproducible installs:
 
 ```bash
-pi install npm:pi-sticky-model@0.1.0
+pi install npm:pi-sticky-model@0.2.1
 ```
 
 Install into the current project instead of your user Pi settings:
@@ -69,18 +71,27 @@ Then run `/model` to pick a model, then `/new` — your model stays.
 
 ## Package contents
 
+Shipped files (see `package.json` `files` and `npm pack --dry-run`):
+
 | Path | Purpose |
 |---|---|
 | `extensions/index.ts` | Pi extension entrypoint — event hooks for model persistence |
 | `lib/sticky-model.ts` | Process-scoped global state for the sticky model |
-| `tests/` | Node test runner unit tests |
-| `docs/` | Release setup (Trusted Publishing) |
+| `README.md` | Package overview and install guide |
+| `CHANGELOG.md` | Version history |
+| `LICENSE` | MIT license |
 
 ## Development
 
 ```bash
 npm install
 npm run ci
+```
+
+`npm run ci` runs typecheck, tests, and `npm pack --dry-run` via `pack:check`. Confirm the published tarball any time with:
+
+```bash
+npm run pack:check
 ```
 
 Short flow:
