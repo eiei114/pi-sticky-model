@@ -114,6 +114,7 @@ See [`docs/release.md`](docs/release.md) for setup details.
 ## Docs
 
 - [`docs/release.md`](docs/release.md) — Trusted Publishing setup details
+- [`docs/health-check.md`](docs/health-check.md) — Maintenance health check baseline
 
 ## Security
 
