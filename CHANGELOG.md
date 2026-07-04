@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Add Buy Me a Coffee sponsor button to README and native GitHub funding link via `.github/FUNDING.yml`.
+
 All notable changes to this project will be documented in this file.
 
 This project follows semantic versioning.
@@ -19,3 +23,4 @@ This project follows semantic versioning.
   - `extensions/index.ts` — `model_select` and `session_start` event hooks
   - Model selection persists across `/new`, `/resume`, `/fork`
   - Model resets to `settings.json` default on Ctrl+C / process exit
+
