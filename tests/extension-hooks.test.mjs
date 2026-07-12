@@ -219,3 +219,46 @@ test("session_start does nothing when no sticky model was set", async () => {
   assert.deepEqual(setModelCalls, []);
   assert.equal(notifications.length, 0);
 });
+
+test("session_shutdown clears sticky model state", async () => {
+  const createExtension = await loadExtension();
+  const { setStickyModel } = await import("../lib/sticky-model.ts");
+  setStickyModel({ provider: "google", model: "gemini-2.5-pro" });
+
+  const { api, emit } = createMockAPI();
+  createExtension(api);
+
+  await emit("session_shutdown", { type: "session_shutdown" }, {});
+
+  assert.equal(getStickyModel(), undefined);
+});
+
+test("model_select skips UI updates when hasUI is false", async () => {
+  const createExtension = await loadExtension();
+  const { api, emit } = createMockAPI();
+  const { ui, status } = createMockUI();
+  const ctx = createMockContext({
+    ui,
+    modelRegistry: createMockModelRegistry(),
+  });
+  ctx.hasUI = false;
+
+  createExtension(api);
+
+  await emit(
+    "model_select",
+    {
+      type: "model_select",
+      model: makeModel("google", "gemini-2.5-pro"),
+      previousModel: undefined,
+      source: "set",
+    },
+    ctx,
+  );
+
+  assert.deepEqual(getStickyModel(), {
+    provider: "google",
+    model: "gemini-2.5-pro",
+  });
+  assert.equal(status.get("sticky-model"), undefined);
+});
