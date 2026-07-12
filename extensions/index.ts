@@ -2,6 +2,7 @@ import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import {
   setStickyModel,
   getStickyModel,
+  clearStickyModel,
   type StickyModelRef,
 } from "../lib/sticky-model.ts";
 
@@ -17,7 +18,9 @@ export default function (pi: ExtensionAPI) {
       model: event.model.id,
     };
     setStickyModel(ref);
-    ctx.ui.setStatus(STATUS_KEY, `sticky: ${ref.provider}/${ref.model}`);
+    if (ctx.hasUI) {
+      ctx.ui.setStatus(STATUS_KEY, `sticky: ${ref.provider}/${ref.model}`);
+    }
   });
 
   // Restore sticky model on session transitions
@@ -30,25 +33,33 @@ export default function (pi: ExtensionAPI) {
     // Find the model in the registry to get the full Model object
     const model = ctx.modelRegistry.find(sticky.provider, sticky.model);
     if (!model) {
-      ctx.ui.notify(
-        `pi-sticky-model: saved model ${sticky.provider}/${sticky.model} not found in registry, falling back to default.`,
-        "warning",
-      );
+      if (ctx.hasUI) {
+        ctx.ui.notify(
+          `pi-sticky-model: saved model ${sticky.provider}/${sticky.model} not found in registry, falling back to default.`,
+          "warning",
+        );
+      }
       return;
     }
 
     const restored = await pi.setModel(model);
-    if (restored) {
-      ctx.ui.setStatus(STATUS_KEY, `sticky: ${sticky.provider}/${sticky.model}`);
-      ctx.ui.notify(
-        `Restored sticky model: ${sticky.provider}/${sticky.model}`,
-        "info",
-      );
-    } else {
-      ctx.ui.notify(
-        `pi-sticky-model: failed to restore ${sticky.provider}/${sticky.model}`,
-        "warning",
-      );
+    if (ctx.hasUI) {
+      if (restored) {
+        ctx.ui.setStatus(STATUS_KEY, `sticky: ${sticky.provider}/${sticky.model}`);
+        ctx.ui.notify(
+          `Restored sticky model: ${sticky.provider}/${sticky.model}`,
+          "info",
+        );
+      } else {
+        ctx.ui.notify(
+          `pi-sticky-model: failed to restore ${sticky.provider}/${sticky.model}`,
+          "warning",
+        );
+      }
     }
+  });
+
+  pi.on("session_shutdown", async () => {
+    clearStickyModel();
   });
 }
