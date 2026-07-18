@@ -45,3 +45,9 @@ test("README includes expected OSS badges", async () => {
   assert.match(readme, /img\.shields\.io\/npm\/v\/pi-sticky-model/);
   assert.match(readme, /License-MIT/);
 });
+
+test("README install pin matches package.json version", async () => {
+  const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
+  const pin = `pi install npm:pi-sticky-model@${packageJson.version}`;
+  assert.match(readme, new RegExp(pin.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
+});
