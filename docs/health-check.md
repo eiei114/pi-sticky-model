@@ -1,6 +1,6 @@
-# Maintenance health check (2026-W27)
+# Maintenance health check (2026-W29)
 
-Baseline review for `pi-sticky-model@0.2.1` after nine implementation issues and no prior maintenance cycle.
+Baseline review for `pi-sticky-model@0.2.2` after extension-hook tests, corrupt-state guards, template alignment, and auto-release workflow adoption.
 
 ## Package completeness (pi-extension-template policy)
 
@@ -10,7 +10,7 @@ Baseline review for `pi-sticky-model@0.2.1` after nine implementation issues and
 | `CODE_OF_CONDUCT.md` | ✅ | Contributor Covenant reference |
 | `CONTRIBUTING.md` | ✅ | Dev flow, `npm run ci`, release notes |
 | `LICENSE` | ✅ | MIT |
-| `CHANGELOG.md` | ✅ | Entries through 0.2.1 |
+| `CHANGELOG.md` | ✅ | Entries through 0.2.2 |
 | README badges | ✅ | CI, Publish, npm version/downloads, License, Pi package, Trusted Publishing |
 | `docs/release.md` | ✅ | Trusted Publishing setup documented |
 | `package.json` `files` | ✅ | `extensions/`, `lib/`, README, LICENSE, CHANGELOG only |
@@ -21,48 +21,47 @@ Baseline review for `pi-sticky-model@0.2.1` after nine implementation issues and
 
 | Check | Status | Notes |
 |-------|--------|-------|
-| `.github/workflows/ci.yml` | ✅ | `ubuntu-latest`, Node 24, `npm ci` + `npm run ci` |
-| Local `npm run ci` | ✅ | typecheck + 8 tests + `pack:check` pass |
-| Latest main CI (GitHub) | ✅ | Success on 2026-06-27 (`28275095200`) |
-| PR CI on recent merges | ✅ | PRs #16, #17 green before merge |
+| `.github/workflows/ci.yml` | ✅ | `ubuntu-latest`, Node 24, `setup-bun`, `npm ci` + `npm run ci` |
+| Local `npm run ci` | ✅ | typecheck + 31 tests + `pack:check` pass |
+| Latest main CI (GitHub) | ✅ | Success after template alignment (PR #28) |
+| PR CI on recent merges | ✅ | PRs #24–#28 green before merge |
 
 ## Publish pipeline
 
 | Check | Status | Notes |
 |-------|--------|-------|
 | `.github/workflows/publish.yml` | ✅ | `id-token: write`, `registry-url`, `npm publish --access public` |
+| `.github/workflows/auto-release.yml` | ✅ | Tags and GitHub Release on `package.json` version bump; triggers `publish.yml` |
 | Trusted Publishing docs | ✅ | No `NPM_TOKEN`; workflow filename documented |
-| npm published version | ✅ | `0.2.1` on registry |
-| `auto-release.yml` | ⚪ N/A | Not used; release flow relies on tags, releases, and `package.json` pushes on `main` (documented in `docs/release.md`) |
+| npm published version | ⚪ | `0.2.2` pending publish after merge |
 
 ## Test inventory
 
 | File | Tests | Coverage |
 |------|-------|----------|
-| `tests/smoke.test.mjs` | 4 | Package metadata, publish workflow handoff |
-| `tests/sticky-model.test.mjs` | 4 | `set/get/clear` on `lib/sticky-model.ts` |
-| **Total** | **8** | **8 pass, 0 fail** |
+| `tests/smoke.test.mjs` | 11 | Package metadata, policy files, README badges, install pin |
+| `tests/extension-hooks.test.mjs` | 9 | `model_select`, `session_start`, `session_shutdown` hooks |
+| `tests/sticky-model.test.mjs` | 11 | `set/get/clear` plus corrupt `globalThis` state guards |
+| **Total** | **31** | **31 pass, 0 fail** |
 
 ### Coverage gaps (non-trivial)
 
-1. **Extension hooks untested** — `extensions/index.ts` handlers (`model_select`, `session_start`) have no unit or integration tests. Persistence across `/new`, `/resume`, `/fork` is documented but not automated.
-2. **Edge cases untested** — `source === "restore"` skip, `reason === "startup"` skip, missing registry model fallback, `pi.setModel` failure path, corrupt `globalThis` state shape.
-3. **Process exit / Ctrl+C reset** — Documented as process-scoped; no test harness for process lifecycle (acceptable for now; manual verification only).
+1. **Process exit / Ctrl+C reset** — Documented as process-scoped; no test harness for process lifecycle (acceptable; manual verification only).
 
 ## Docs freshness
 
 | Area | Status | Notes |
 |------|--------|-------|
 | README vs behavior | ✅ | Features match extension code |
-| README install pins | ✅ | Example uses `@0.2.1` |
-| `docs/release.md` vs workflows | ✅ | Aligned after DOT-304 (no stale `auto-release.yml` references) |
+| README install pins | ✅ | Example uses `@0.2.2` (guarded by smoke test) |
+| `docs/release.md` vs workflows | ✅ | Trusted Publishing path documented |
 | Code comments | ✅ | Extension entrypoint documents event intent |
 
 ## Behavioral change policy
 
-This health check introduces **no changes** to model persistence logic. Additions are documentation and smoke-test guardrails only.
+This health check introduces **no changes** to model persistence logic. Additions are documentation accuracy and smoke-test guardrails only.
 
-## Follow-up issues filed
+## Resolved follow-ups (since W27)
 
-- [#19 — test: add integration tests for extension session hooks](https://github.com/eiei114/pi-sticky-model/issues/19)
-- [#20 — test: validate sticky model ref shape and corrupt global state](https://github.com/eiei114/pi-sticky-model/issues/20)
+- [#19 — extension session hooks](https://github.com/eiei114/pi-sticky-model/issues/19) — closed via PR #25 (`tests/extension-hooks.test.mjs`)
+- [#20 — corrupt global state validation](https://github.com/eiei114/pi-sticky-model/issues/20) — closed via PR #26 (`tests/sticky-model.test.mjs`)
