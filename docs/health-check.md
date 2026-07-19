@@ -65,3 +65,4 @@ This health check introduces **no changes** to model persistence logic. Addition
 
 - [#19 — extension session hooks](https://github.com/eiei114/pi-sticky-model/issues/19) — closed via PR #25 (`tests/extension-hooks.test.mjs`)
 - [#20 — corrupt global state validation](https://github.com/eiei114/pi-sticky-model/issues/20) — closed via PR #26 (`tests/sticky-model.test.mjs`)
+- [#22 — transitive devDependency audit warnings](https://github.com/eiei114/pi-sticky-model/issues/22) — closed via PR #24 / DOT-634 (`npm audit` total 0)
