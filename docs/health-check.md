@@ -1,4 +1,4 @@
-# Maintenance health check (2026-W29)
+# Maintenance health check (2026-W30)
 
 Baseline review for `pi-sticky-model@0.2.2` after extension-hook tests, corrupt-state guards, template alignment, and auto-release workflow adoption.
 
@@ -33,7 +33,7 @@ Baseline review for `pi-sticky-model@0.2.2` after extension-hook tests, corrupt-
 | `.github/workflows/publish.yml` | ✅ | `id-token: write`, `registry-url`, `npm publish --access public` |
 | `.github/workflows/auto-release.yml` | ✅ | Tags and GitHub Release on `package.json` version bump; triggers `publish.yml` |
 | Trusted Publishing docs | ✅ | No `NPM_TOKEN`; workflow filename documented |
-| npm published version | ⚪ | `0.2.2` pending publish after merge |
+| npm published version | ✅ | `0.2.2` published to npm |
 
 ## Test inventory
 
