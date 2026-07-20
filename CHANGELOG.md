@@ -1,10 +1,10 @@
 # Changelog
 
-## Unreleased
-
 All notable changes to this project will be documented in this file.
 
 This project follows semantic versioning.
+
+## Unreleased
 
 ## [0.2.2] - 2026-07-04
 
