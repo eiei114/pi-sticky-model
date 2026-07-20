@@ -6,6 +6,10 @@ This project follows semantic versioning.
 
 ## Unreleased
 
+### Changed
+
+- Bump package version to `0.2.3` for the next patch release.
+
 ## [0.2.2] - 2026-07-04
 
 ### Added
