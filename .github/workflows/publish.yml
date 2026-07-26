@@ -24,6 +24,7 @@ concurrency:
 jobs:
   publish:
     name: Publish package
+    if: github.event_name != 'release' || github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
 
     steps:
