@@ -23,7 +23,7 @@ Publishing runs when:
 
 - A `v*.*.*` tag is pushed
 - A GitHub Release is published
-- `package.json` changes on `main` (via `.github/workflows/publish.yml`)
+- `.github/workflows/auto-release.yml` tags a new `package.json` version on `main` and triggers `publish.yml`
 - The workflow is triggered manually with `workflow_dispatch`
 
 The workflow skips `name@version` if that exact package version already exists on npm.

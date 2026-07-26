@@ -13,6 +13,7 @@ const POLICY_FILES = [
 
 const packageJson = JSON.parse(await readFile(new URL("../package.json", import.meta.url), "utf8"));
 const publishWorkflow = await readFile(new URL("../.github/workflows/publish.yml", import.meta.url), "utf8");
+const releaseDoc = await readFile(new URL("../docs/release.md", import.meta.url), "utf8");
 
 test("package declares extension entrypoint", () => {
   assert.deepEqual(packageJson.pi.extensions, ["./extensions"]);
@@ -30,6 +31,15 @@ test("package includes npm release workflow handoff", () => {
   assert.match(publishWorkflow, /id-token:\s*write/);
   assert.match(publishWorkflow, /workflow_dispatch:/);
   assert.match(publishWorkflow, /npm publish --access public/);
+});
+
+test("publish workflow does not publish on direct main package.json pushes", () => {
+  assert.doesNotMatch(publishWorkflow, /branches:\s*\n\s*- main/);
+});
+
+test("docs/release.md matches publish workflow triggers", () => {
+  assert.doesNotMatch(releaseDoc, /package\.json changes on `main`/);
+  assert.match(releaseDoc, /auto-release\.yml/);
 });
 
 for (const file of POLICY_FILES) {
