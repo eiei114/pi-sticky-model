@@ -46,16 +46,18 @@ test("publish workflow trigger contract avoids direct main package.json pushes",
 
 test("auto-release version bumps publish exactly once", () => {
   assert.match(autoReleaseWorkflow, /push:\s*\n\s*branches:\s*\[main\]\s*\n\s*paths:\s*\n\s*- package\.json/);
+  assert.match(autoReleaseWorkflow, /actions:\s*write/);
   assert.match(autoReleaseWorkflow, /git push origin "\$TAG"/);
   assert.match(autoReleaseWorkflow, /gh release create "\$TAG"/);
-  assert.doesNotMatch(autoReleaseWorkflow, /gh workflow run publish\.yml/);
+  assert.match(autoReleaseWorkflow, /gh workflow run publish\.yml --ref main -f ref="\$TAG"/);
   assert.match(publishWorkflow, /github\.event_name != 'release' \|\| github\.actor != 'github-actions\[bot\]'/);
 });
 
 test("docs/release.md matches publish workflow triggers", () => {
   assert.match(releaseDoc, /`package\.json` changes on `main`/);
   assert.match(releaseDoc, /`\.github\/workflows\/auto-release\.yml`: it creates a matching `v\*\.\*\.\*` tag and GitHub Release/);
-  assert.match(releaseDoc, /`publish\.yml` publishes once from the tag push/);
+  assert.match(releaseDoc, /explicitly dispatches `publish\.yml` with that tag/);
+  assert.match(releaseDoc, /tag pushed by `GITHUB_TOKEN`/);
 });
 
 for (const file of POLICY_FILES) {
