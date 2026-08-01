@@ -183,7 +183,7 @@ test("new session restores its predecessor thinking level after the model", asyn
     "/sessions/a.jsonl",
   );
 
-  const { api, emit, setModelCalls, setThinkingLevelCalls } = createMockAPI();
+  const { api, emit, setModelCalls, setThinkingLevelCalls, callLog } = createMockAPI();
   const { ui } = createMockUI();
   const ctx = createMockContext({
     ui,
@@ -204,6 +204,10 @@ test("new session restores its predecessor thinking level after the model", asyn
 
   assert.deepEqual(setModelCalls, [model]);
   assert.deepEqual(setThinkingLevelCalls, ["high"]);
+  assert.deepEqual(callLog, [
+    { method: "setModel", value: model },
+    { method: "setThinkingLevel", value: "high" },
+  ]);
 });
 
 test("session_start skips restore on startup", async () => {

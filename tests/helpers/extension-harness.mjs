@@ -11,6 +11,8 @@ export function createMockAPI(options = {}) {
   const setModelCalls = [];
   /** @type {string[]} */
   const setThinkingLevelCalls = [];
+  /** @type {Array<{ method: string, value: unknown }>} */
+  const callLog = [];
 
   const api = {
     on(event, handler) {
@@ -20,6 +22,7 @@ export function createMockAPI(options = {}) {
     },
     async setModel(model) {
       setModelCalls.push(model);
+      callLog.push({ method: "setModel", value: model });
       return setModelResult;
     },
     getThinkingLevel() {
@@ -27,6 +30,7 @@ export function createMockAPI(options = {}) {
     },
     setThinkingLevel(level) {
       setThinkingLevelCalls.push(level);
+      callLog.push({ method: "setThinkingLevel", value: level });
     },
   };
 
@@ -36,7 +40,7 @@ export function createMockAPI(options = {}) {
     }
   }
 
-  return { api, handlers, emit, setModelCalls, setThinkingLevelCalls };
+  return { api, handlers, emit, setModelCalls, setThinkingLevelCalls, callLog };
 }
 
 export function createMockUI() {
