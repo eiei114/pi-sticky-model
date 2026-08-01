@@ -8,7 +8,10 @@ This project follows semantic versioning.
 
 ### Changed
 
-- Bump package version to `0.2.3` for the next patch release.
+- Store sticky model state per session file instead of sharing one process-wide model.
+- Inherit only the previous session model for `/new` and `/fork`, and restore the target session model for `/resume`.
+- Clear only the current session state on Ctrl+C or session shutdown.
+- Bump package version to `0.3.0` for the next minor release.
 
 ## [0.2.2] - 2026-07-04
 
@@ -37,4 +40,3 @@ This project follows semantic versioning.
   - `extensions/index.ts` — `model_select` and `session_start` event hooks
   - Model selection persists across `/new`, `/resume`, `/fork`
   - Model resets to `settings.json` default on Ctrl+C / process exit
-

@@ -1,4 +1,5 @@
 const GLOBAL_KEY = "__pi_sticky_model";
+const DEFAULT_SESSION_KEY = "__default__";
 
 export interface StickyModelRef {
   provider: string;
@@ -23,17 +24,19 @@ function isValidStickyModelRef(value: unknown): value is StickyModelRef {
   );
 }
 
-/** Store a model ref in process-scoped global memory. */
-export function setStickyModel(ref: StickyModelRef): void {
-  (globalThis as Record<string, unknown>)[GLOBAL_KEY] = ref;
+/** Store a model ref in process-scoped global memory for one session. */
+export function setStickyModel(ref: StickyModelRef, sessionKey = DEFAULT_SESSION_KEY): void {
+  const state = getState();
+  state[sessionKey] = ref;
 }
 
 /**
  * Retrieve the stored model ref, or undefined if none was set
  * or the stored value has an invalid shape (corrupt / partial ref).
  */
-export function getStickyModel(): StickyModelRef | undefined {
-  const raw = (globalThis as Record<string, unknown>)[GLOBAL_KEY];
+export function getStickyModel(sessionKey = DEFAULT_SESSION_KEY): StickyModelRef | undefined {
+  const state = getState();
+  const raw = state[sessionKey];
   if (raw === undefined) return undefined;
   if (!isValidStickyModelRef(raw)) {
     if (!warnedOnce) {
@@ -47,9 +50,36 @@ export function getStickyModel(): StickyModelRef | undefined {
   return raw;
 }
 
-/** Clear the stored model ref. */
-export function clearStickyModel(): void {
-  delete (globalThis as Record<string, unknown>)[GLOBAL_KEY];
+/** Clear the stored model ref for one session, or all sessions when no key is given. */
+export function clearStickyModel(sessionKey?: string): void {
+  if (sessionKey === undefined) {
+    delete (globalThis as Record<string, unknown>)[GLOBAL_KEY];
+    return;
+  }
+  delete getState()[sessionKey];
+}
+
+/** Copy a session's model when creating or forking a replacement session. */
+export function copyStickyModel(fromSessionKey: string, toSessionKey: string): void {
+  const sticky = getStickyModel(fromSessionKey);
+  if (sticky) setStickyModel(sticky, toSessionKey);
+}
+
+function getState(): Record<string, unknown> {
+  const globals = globalThis as Record<string, unknown>;
+  const raw = globals[GLOBAL_KEY];
+  if (raw && typeof raw === "object" && !Array.isArray(raw)) {
+    return raw as Record<string, unknown>;
+  }
+  if (raw !== undefined && !warnedOnce) {
+    console.warn(
+      "[pi-sticky-model] Ignoring corrupt StickyModelRef state on globalThis; treating as absent."
+    );
+    warnedOnce = true;
+  }
+  const state: Record<string, unknown> = {};
+  globals[GLOBAL_KEY] = state;
+  return state;
 }
 
 /**
