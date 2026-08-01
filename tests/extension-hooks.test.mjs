@@ -111,6 +111,42 @@ test("session_start restores sticky model on new, resume, and fork", async () =>
   }
 });
 
+test("new session inherits its predecessor model, not another session's model", async () => {
+  const createExtension = await loadExtension();
+  const { setStickyModel, getStickyModel } = await import("../lib/sticky-model.ts");
+  const modelA = makeModel("google", "gemini-2.5-pro");
+  const modelB = makeModel("deepseek", "deepseek-v4-pro");
+
+  clearStickyModel();
+  setStickyModel({ provider: modelA.provider, model: modelA.id }, "/sessions/a.jsonl");
+  setStickyModel({ provider: modelB.provider, model: modelB.id }, "/sessions/b.jsonl");
+
+  const { api, emit, setModelCalls } = createMockAPI();
+  const { ui } = createMockUI();
+  const ctx = createMockContext({
+    ui,
+    sessionFile: "/sessions/c.jsonl",
+    modelRegistry: createMockModelRegistry([modelA, modelB]),
+  });
+  createExtension(api);
+
+  await emit(
+    "session_start",
+    {
+      type: "session_start",
+      reason: "new",
+      previousSessionFile: "/sessions/a.jsonl",
+    },
+    ctx,
+  );
+
+  assert.deepEqual(setModelCalls, [modelA]);
+  assert.deepEqual(getStickyModel("/sessions/c.jsonl"), {
+    provider: modelA.provider,
+    model: modelA.id,
+  });
+});
+
 test("session_start skips restore on startup", async () => {
   const createExtension = await loadExtension();
   const { setStickyModel } = await import("../lib/sticky-model.ts");

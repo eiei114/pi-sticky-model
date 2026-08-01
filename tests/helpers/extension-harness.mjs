@@ -63,14 +63,14 @@ export function createMockModelRegistry(models = []) {
 }
 
 /**
- * @param {{ ui: object, modelRegistry: object }} params
+ * @param {{ ui: object, modelRegistry: object, sessionFile?: string }} params
  */
-export function createMockContext({ ui, modelRegistry }) {
+export function createMockContext({ ui, modelRegistry, sessionFile }) {
   return {
     ui,
     hasUI: true,
     cwd: "/tmp",
-    sessionManager: {},
+    sessionManager: sessionFile === undefined ? {} : { getSessionFile: () => sessionFile },
     modelRegistry,
     model: undefined,
     isIdle: () => true,
