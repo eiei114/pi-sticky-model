@@ -41,6 +41,7 @@ test("model_select stores provider/model and updates status", async () => {
   assert.deepEqual(getStickyModel(), {
     provider: "google",
     model: "gemini-2.5-pro",
+    thinkingLevel: "medium",
   });
   assert.equal(status.get("sticky-model"), "sticky: google/gemini-2.5-pro");
 });
@@ -70,6 +71,31 @@ test("model_select skips sticky update when source is restore", async () => {
   assert.equal(getStickyModel(), undefined);
   assert.equal(status.get("sticky-model"), undefined);
   assert.equal(notifications.length, 0);
+});
+
+test("thinking_level_select stores the active model and thinking level", async () => {
+  const createExtension = await loadExtension();
+  const { api, emit } = createMockAPI();
+  const { ui } = createMockUI();
+  const model = makeModel("openai", "gpt-5.4");
+  const ctx = createMockContext({
+    ui,
+    model,
+    modelRegistry: createMockModelRegistry([model]),
+  });
+
+  createExtension(api);
+  await emit(
+    "thinking_level_select",
+    { type: "thinking_level_select", level: "high", previousLevel: "medium" },
+    ctx,
+  );
+
+  assert.deepEqual(getStickyModel(), {
+    provider: "openai",
+    model: "gpt-5.4",
+    thinkingLevel: "high",
+  });
 });
 
 test("session_start restores sticky model on new, resume, and fork", async () => {
@@ -145,6 +171,39 @@ test("new session inherits its predecessor model, not another session's model", 
     provider: modelA.provider,
     model: modelA.id,
   });
+});
+
+test("new session restores its predecessor thinking level after the model", async () => {
+  const createExtension = await loadExtension();
+  const { setStickyModel } = await import("../lib/sticky-model.ts");
+  const model = makeModel("openai", "gpt-5.4");
+
+  setStickyModel(
+    { provider: model.provider, model: model.id, thinkingLevel: "high" },
+    "/sessions/a.jsonl",
+  );
+
+  const { api, emit, setModelCalls, setThinkingLevelCalls } = createMockAPI();
+  const { ui } = createMockUI();
+  const ctx = createMockContext({
+    ui,
+    sessionFile: "/sessions/b.jsonl",
+    modelRegistry: createMockModelRegistry([model]),
+  });
+  createExtension(api);
+
+  await emit(
+    "session_start",
+    {
+      type: "session_start",
+      reason: "new",
+      previousSessionFile: "/sessions/a.jsonl",
+    },
+    ctx,
+  );
+
+  assert.deepEqual(setModelCalls, [model]);
+  assert.deepEqual(setThinkingLevelCalls, ["high"]);
 });
 
 test("session_start skips restore on startup", async () => {
@@ -295,6 +354,7 @@ test("model_select skips UI updates when hasUI is false", async () => {
   assert.deepEqual(getStickyModel(), {
     provider: "google",
     model: "gemini-2.5-pro",
+    thinkingLevel: "medium",
   });
   assert.equal(status.get("sticky-model"), undefined);
 });

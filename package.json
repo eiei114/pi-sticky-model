@@ -1,7 +1,7 @@
 {
   "name": "pi-sticky-model",
-  "version": "0.3.0",
-  "description": "Pi extension that keeps your selected model across /new, /resume, and /fork within the same session. Model resets on Ctrl+C.",
+  "version": "0.4.0",
+  "description": "Pi extension that keeps your selected model and thinking level across /new, /resume, and /fork. Resets on Ctrl+C.",
   "type": "module",
   "license": "MIT",
   "author": "Keisu",

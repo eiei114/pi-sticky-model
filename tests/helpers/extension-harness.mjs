@@ -1,14 +1,16 @@
 /** Lightweight mock ExtensionAPI / context harness for extension hook tests. */
 
 /**
- * @param {{ setModelResult?: boolean }} [options]
+ * @param {{ setModelResult?: boolean, thinkingLevel?: string }} [options]
  */
 export function createMockAPI(options = {}) {
-  const { setModelResult = true } = options;
+  const { setModelResult = true, thinkingLevel = "medium" } = options;
   /** @type {Map<string, Array<(event: unknown, ctx: unknown) => unknown>>} */
   const handlers = new Map();
   /** @type {unknown[]} */
   const setModelCalls = [];
+  /** @type {string[]} */
+  const setThinkingLevelCalls = [];
 
   const api = {
     on(event, handler) {
@@ -20,6 +22,12 @@ export function createMockAPI(options = {}) {
       setModelCalls.push(model);
       return setModelResult;
     },
+    getThinkingLevel() {
+      return thinkingLevel;
+    },
+    setThinkingLevel(level) {
+      setThinkingLevelCalls.push(level);
+    },
   };
 
   async function emit(eventName, event, ctx) {
@@ -28,7 +36,7 @@ export function createMockAPI(options = {}) {
     }
   }
 
-  return { api, handlers, emit, setModelCalls };
+  return { api, handlers, emit, setModelCalls, setThinkingLevelCalls };
 }
 
 export function createMockUI() {
@@ -65,14 +73,14 @@ export function createMockModelRegistry(models = []) {
 /**
  * @param {{ ui: object, modelRegistry: object, sessionFile?: string }} params
  */
-export function createMockContext({ ui, modelRegistry, sessionFile }) {
+export function createMockContext({ ui, modelRegistry, sessionFile, model }) {
   return {
     ui,
     hasUI: true,
     cwd: "/tmp",
     sessionManager: sessionFile === undefined ? {} : { getSessionFile: () => sessionFile },
     modelRegistry,
-    model: undefined,
+    model,
     isIdle: () => true,
     signal: undefined,
     abort: () => {},

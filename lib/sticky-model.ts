@@ -1,9 +1,22 @@
+import type { ThinkingLevel } from "@earendil-works/pi-agent-core";
+
 const GLOBAL_KEY = "__pi_sticky_model";
 const DEFAULT_SESSION_KEY = "__default__";
+
+const THINKING_LEVELS = new Set<ThinkingLevel>([
+  "off",
+  "minimal",
+  "low",
+  "medium",
+  "high",
+  "xhigh",
+  "max",
+]);
 
 export interface StickyModelRef {
   provider: string;
   model: string;
+  thinkingLevel?: ThinkingLevel;
 }
 
 /** Module-level flag to log the corrupt-state warning at most once per process. */
@@ -16,11 +29,14 @@ let warnedOnce = false;
 function isValidStickyModelRef(value: unknown): value is StickyModelRef {
   if (typeof value !== "object" || value === null) return false;
   const ref = value as Record<string, unknown>;
+  const thinkingLevel = ref.thinkingLevel;
   return (
     typeof ref.provider === "string" &&
     ref.provider.length > 0 &&
     typeof ref.model === "string" &&
-    ref.model.length > 0
+    ref.model.length > 0 &&
+    (thinkingLevel === undefined ||
+      (typeof thinkingLevel === "string" && THINKING_LEVELS.has(thinkingLevel as ThinkingLevel)))
   );
 }
 

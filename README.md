@@ -9,17 +9,18 @@
 [![Trusted Publishing](https://img.shields.io/badge/npm-Trusted%20Publishing-blue.svg)](docs/release.md)
 <a href="https://buymeacoffee.com/ekawano114m"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" width="217" height="60"></a>
 
-> Keeps your `/model` selection across `/new`, `/resume`, and `/fork` without mixing models between sessions. Resets on Ctrl+C — no settings.json override needed.
+> Keeps your model and thinking-level selections across `/new`, `/resume`, and `/fork` without mixing settings between sessions. Resets on Ctrl+C — no settings.json override needed.
 
 ## What this is
 
-Pi extension. When you switch models with `/model` or `Ctrl+P`, the selection sticks across `/new`, `/resume`, and `/fork` for the lifetime of the Pi process. Close Pi (Ctrl+C) and everything resets to your `settings.json` default.
+Pi extension. When you switch models with `/model` or `Ctrl+P`, or change the thinking level, the selection sticks across `/new`, `/resume`, and `/fork` for the lifetime of the Pi process. Close Pi (Ctrl+C) and everything resets to your `settings.json` default.
 
 For anyone tired of their model snapping back to the settings.json default every time they start a new conversation. Each session keeps its own model; a new or forked session inherits only from its predecessor.
 
 ## Features
 
 - **Sticky model**: `/model` selection persists across `/new`, `/resume`, `/fork`
+- **Sticky thinking**: thinking level follows the selected model across `/new`, `/resume`, `/fork`
 - **Session-scoped**: sessions keep separate model selections; Ctrl+C / process exit resets the current session
 - **Zero config**: install and it works — no YAML, no JSON, no setup
 - **Reload-safe**: `/reload` preserves your current model
@@ -39,7 +40,7 @@ pi install npm:pi-sticky-model
 Pin a specific version when you want reproducible installs:
 
 ```bash
-pi install npm:pi-sticky-model@0.3.0
+pi install npm:pi-sticky-model@0.4.0
 ```
 
 Install into the current project instead of your user Pi settings:
@@ -68,7 +69,7 @@ Try this package locally:
 pi -e .
 ```
 
-Then run `/model` to pick a model, then `/new` — your model stays.
+Then pick a model and thinking level, then run `/new` — both selections stay.
 
 ## Package contents
 
