@@ -6,12 +6,16 @@ This project follows semantic versioning.
 
 ## Unreleased
 
+### Added
+
+- Persist the selected thinking level alongside the model across `/new`, `/resume`, and `/fork`.
+
 ### Changed
 
 - Store sticky model state per session file instead of sharing one process-wide model.
 - Inherit only the previous session model for `/new` and `/fork`, and restore the target session model for `/resume`.
 - Clear only the current session state on Ctrl+C or session shutdown.
-- Bump package version to `0.3.0` for the next minor release.
+- Bump package version to `0.4.0` for the next minor release.
 
 ## [0.2.2] - 2026-07-04
 

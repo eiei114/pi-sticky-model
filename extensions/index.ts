@@ -22,11 +22,26 @@ export default function (pi: ExtensionAPI) {
     const ref: StickyModelRef = {
       provider: event.model.provider,
       model: event.model.id,
+      thinkingLevel: pi.getThinkingLevel(),
     };
     setStickyModel(ref, sessionKey(ctx));
     if (ctx.hasUI) {
       ctx.ui.setStatus(STATUS_KEY, `sticky: ${ref.provider}/${ref.model}`);
     }
+  });
+
+  // Capture explicit thinking changes independently from model selection so a
+  // replacement tab inherits the complete model configuration.
+  pi.on("thinking_level_select", async (event, ctx) => {
+    if (!ctx.model) return;
+    setStickyModel(
+      {
+        provider: ctx.model.provider,
+        model: ctx.model.id,
+        thinkingLevel: event.level,
+      },
+      sessionKey(ctx),
+    );
   });
 
   // Restore sticky model on session transitions
@@ -53,6 +68,9 @@ export default function (pi: ExtensionAPI) {
     }
 
     const restored = await pi.setModel(model);
+    if (restored && sticky.thinkingLevel !== undefined) {
+      pi.setThinkingLevel(sticky.thinkingLevel);
+    }
     if (ctx.hasUI) {
       if (restored) {
         ctx.ui.setStatus(STATUS_KEY, `sticky: ${sticky.provider}/${sticky.model}`);

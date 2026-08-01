@@ -10,6 +10,10 @@ function setRawGlobal(value) {
   globalThis[GLOBAL_KEY] = value;
 }
 
+function setRawDefault(value) {
+  setRawGlobal({ __default__: value });
+}
+
 test("getStickyModel returns undefined before any set", () => {
   clearStickyModel();
   assert.equal(getStickyModel(), undefined);
@@ -58,28 +62,39 @@ test("getStickyModel returns undefined for non-object corrupt state", () => {
 test("getStickyModel returns undefined for partial state (missing provider)", () => {
   clearStickyModel();
   __resetWarnedOnce();
-  setRawGlobal({ model: "gemini-2.5-pro" });
+  setRawDefault({ model: "gemini-2.5-pro" });
   assert.equal(getStickyModel(), undefined);
 });
 
 test("getStickyModel returns undefined for partial state (missing model)", () => {
   clearStickyModel();
   __resetWarnedOnce();
-  setRawGlobal({ provider: "google" });
+  setRawDefault({ provider: "google" });
   assert.equal(getStickyModel(), undefined);
 });
 
 test("getStickyModel returns undefined for empty provider", () => {
   clearStickyModel();
   __resetWarnedOnce();
-  setRawGlobal({ provider: "", model: "gemini-2.5-pro" });
+  setRawDefault({ provider: "", model: "gemini-2.5-pro" });
   assert.equal(getStickyModel(), undefined);
 });
 
 test("getStickyModel returns undefined for empty model", () => {
   clearStickyModel();
   __resetWarnedOnce();
-  setRawGlobal({ provider: "google", model: "" });
+  setRawDefault({ provider: "google", model: "" });
+  assert.equal(getStickyModel(), undefined);
+});
+
+test("getStickyModel returns undefined for an invalid thinking level", () => {
+  clearStickyModel();
+  __resetWarnedOnce();
+  setRawDefault({
+    provider: "openai",
+    model: "gpt-5.4",
+    thinkingLevel: "ultra",
+  });
   assert.equal(getStickyModel(), undefined);
 });
 
@@ -87,7 +102,7 @@ test("getStickyModel returns valid ref after corrupt state is replaced", () => {
   clearStickyModel();
   __resetWarnedOnce();
   // Set corrupt, then overwrite with valid
-  setRawGlobal({ provider: "", model: "gemini-2.5-pro" });
+  setRawDefault({ provider: "", model: "gemini-2.5-pro" });
   assert.equal(getStickyModel(), undefined);
   setStickyModel({ provider: "google", model: "gemini-2.5-pro" });
   assert.deepEqual(getStickyModel(), {
