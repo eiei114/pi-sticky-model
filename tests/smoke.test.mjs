@@ -43,7 +43,13 @@ function parseHealthCheckTestInventory(healthCheck) {
   const inventorySection = healthCheck.split("## Test inventory")[1]?.split(/^## /m)[0] ?? "";
   for (const line of inventorySection.split("\n")) {
     const match = line.match(/^\| `tests\/([^`]+)` \| (\d+) \|/);
-    if (match) documented[match[1]] = Number(match[2]);
+    if (match) {
+      const file = match[1];
+      if (Object.prototype.hasOwnProperty.call(documented, file)) {
+        throw new Error(`Duplicate test inventory entry: tests/${file}`);
+      }
+      documented[file] = Number(match[2]);
+    }
   }
   return documented;
 }
