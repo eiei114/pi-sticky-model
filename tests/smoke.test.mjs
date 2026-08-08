@@ -38,6 +38,22 @@ async function countInventoryTests() {
   return { total, perFile };
 }
 
+function parseHealthCheckTestInventory(healthCheck) {
+  const documented = {};
+  const inventorySection = healthCheck.split("## Test inventory")[1]?.split(/^## /m)[0] ?? "";
+  for (const line of inventorySection.split("\n")) {
+    const match = line.match(/^\| `tests\/([^`]+)` \| (\d+) \|/);
+    if (match) {
+      const file = match[1];
+      if (Object.prototype.hasOwnProperty.call(documented, file)) {
+        throw new Error(`Duplicate test inventory entry: tests/${file}`);
+      }
+      documented[file] = Number(match[2]);
+    }
+  }
+  return documented;
+}
+
 test("package declares extension entrypoint", () => {
   assert.deepEqual(packageJson.pi.extensions, ["./extensions"]);
 });
@@ -112,7 +128,14 @@ test("docs/health-check.md baseline matches package version and test inventory",
   assert.match(healthCheck, new RegExp(`Entries through ${version.replace(/\./g, "\\.")}`));
   assert.ok(healthCheck.includes(`| Local \`npm run ci\` | ✅ | typecheck + ${total} tests + \`pack:check\` pass |`));
   assert.ok(healthCheck.includes(`| **Total** | **${total}** | **${total} pass, 0 fail** |`));
-  assert.ok(healthCheck.includes(`| \`tests/smoke.test.mjs\` | ${perFile["smoke.test.mjs"]} |`));
-  assert.ok(healthCheck.includes(`| \`tests/extension-hooks.test.mjs\` | ${perFile["extension-hooks.test.mjs"]} |`));
-  assert.ok(healthCheck.includes(`| \`tests/sticky-model.test.mjs\` | ${perFile["sticky-model.test.mjs"]} |`));
+
+  const documented = parseHealthCheckTestInventory(healthCheck);
+  assert.deepEqual(
+    Object.keys(documented).sort(),
+    Object.keys(perFile).sort(),
+    "health-check.md test inventory must list every .test.mjs file",
+  );
+  for (const [file, count] of Object.entries(perFile)) {
+    assert.equal(documented[file], count, `health-check.md must document tests/${file} with count ${count}`);
+  }
 });
