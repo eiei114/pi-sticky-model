@@ -1,6 +1,5 @@
 import assert from "node:assert/strict";
-import { access } from "node:fs/promises";
-import { readFile } from "node:fs/promises";
+import { access, readdir, readFile } from "node:fs/promises";
 import test from "node:test";
 
 const POLICY_FILES = [
@@ -15,6 +14,29 @@ const packageJson = JSON.parse(await readFile(new URL("../package.json", import.
 const publishWorkflow = await readFile(new URL("../.github/workflows/publish.yml", import.meta.url), "utf8");
 const autoReleaseWorkflow = await readFile(new URL("../.github/workflows/auto-release.yml", import.meta.url), "utf8");
 const releaseDoc = await readFile(new URL("../docs/release.md", import.meta.url), "utf8");
+
+async function countInventoryTests() {
+  const testDir = new URL(".", import.meta.url);
+  const perFile = {};
+  let total = 0;
+
+  for (const file of await readdir(testDir)) {
+    if (!file.endsWith(".test.mjs")) continue;
+    const content = await readFile(new URL(file, testDir), "utf8");
+    let count = 0;
+    for (const line of content.split("\n")) {
+      if (/^test\(/.test(line)) count++;
+    }
+    const policyMatch = content.match(/const POLICY_FILES = \[([\s\S]*?)\];/);
+    if (policyMatch) {
+      count += (policyMatch[1].match(/"[^"]+"/g) ?? []).length;
+    }
+    perFile[file] = count;
+    total += count;
+  }
+
+  return { total, perFile };
+}
 
 test("package declares extension entrypoint", () => {
   assert.deepEqual(packageJson.pi.extensions, ["./extensions"]);
@@ -78,4 +100,19 @@ test("README install pin matches package.json version", async () => {
   const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
   const pin = `pi install npm:pi-sticky-model@${packageJson.version}`;
   assert.match(readme, new RegExp(pin.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
+});
+
+test("docs/health-check.md baseline matches package version and test inventory", async () => {
+  const healthCheck = await readFile(new URL("../docs/health-check.md", import.meta.url), "utf8");
+  const version = packageJson.version;
+  const { total, perFile } = await countInventoryTests();
+
+  assert.match(healthCheck, /# Maintenance health check \(2026-W32\)/);
+  assert.match(healthCheck, new RegExp(`pi-sticky-model@${version.replace(/\./g, "\\.")}`));
+  assert.match(healthCheck, new RegExp(`Entries through ${version.replace(/\./g, "\\.")}`));
+  assert.ok(healthCheck.includes(`| Local \`npm run ci\` | ✅ | typecheck + ${total} tests + \`pack:check\` pass |`));
+  assert.ok(healthCheck.includes(`| **Total** | **${total}** | **${total} pass, 0 fail** |`));
+  assert.ok(healthCheck.includes(`| \`tests/smoke.test.mjs\` | ${perFile["smoke.test.mjs"]} |`));
+  assert.ok(healthCheck.includes(`| \`tests/extension-hooks.test.mjs\` | ${perFile["extension-hooks.test.mjs"]} |`));
+  assert.ok(healthCheck.includes(`| \`tests/sticky-model.test.mjs\` | ${perFile["sticky-model.test.mjs"]} |`));
 });
