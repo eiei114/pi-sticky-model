@@ -1,6 +1,6 @@
 # Maintenance health check (2026-W32)
 
-Baseline review for `pi-sticky-model@0.4.1` after session-scoped sticky model/thinking persistence, auto-release publish dispatch, and Pi 0.82.x dependency alignment.
+Baseline review for `pi-sticky-model@0.4.2` after session-scoped sticky model/thinking persistence, auto-release publish dispatch, and Pi 0.84.x dependency alignment.
 
 ## Package completeness (pi-extension-template policy)
 
@@ -10,7 +10,7 @@ Baseline review for `pi-sticky-model@0.4.1` after session-scoped sticky model/th
 | `CODE_OF_CONDUCT.md` | ✅ | Contributor Covenant reference |
 | `CONTRIBUTING.md` | ✅ | Dev flow, `npm run ci`, release notes |
 | `LICENSE` | ✅ | MIT |
-| `CHANGELOG.md` | ✅ | Entries through 0.4.1 |
+| `CHANGELOG.md` | ✅ | Entries through 0.4.2 |
 | README badges | ✅ | Discord, CI, Publish, npm version/downloads, License, Pi package, Trusted Publishing |
 | `docs/release.md` | ✅ | Trusted Publishing + auto-release dispatch documented |
 | `package.json` `files` | ✅ | `extensions/`, `lib/`, README, LICENSE, CHANGELOG only |
@@ -33,7 +33,7 @@ Baseline review for `pi-sticky-model@0.4.1` after session-scoped sticky model/th
 | `.github/workflows/publish.yml` | ✅ | `id-token: write`, `registry-url`, `npm publish --access public` |
 | `.github/workflows/auto-release.yml` | ✅ | Tags + GitHub Release on `package.json` bump; dispatches `publish.yml` |
 | Trusted Publishing docs | ✅ | No `NPM_TOKEN`; workflow filename documented |
-| npm published version | ✅ | `0.4.1` published to npm |
+| npm published version | ✅ | `0.4.2` published to npm |
 
 ## Test inventory
 
@@ -53,7 +53,7 @@ Baseline review for `pi-sticky-model@0.4.1` after session-scoped sticky model/th
 | Area | Status | Notes |
 |------|--------|-------|
 | README vs behavior | ✅ | Features match extension code (model + thinking level, session-scoped) |
-| README install pins | ✅ | Example uses `@0.4.1` (guarded by smoke test) |
+| README install pins | ✅ | Example uses `@0.4.2` (guarded by smoke test) |
 | `docs/release.md` vs workflows | ✅ | Auto-release dispatch path documented |
 | Code comments | ✅ | Extension entrypoint documents event intent |
 

@@ -6,6 +6,12 @@ This project follows semantic versioning.
 
 ## Unreleased
 
+## [0.4.2] - 2026-08-22
+
+### Changed
+
+- Merge the 2026-08-22 managed OSS dependency and maintenance PR batch.
+
 ### Added
 
 - Persist the selected thinking level alongside the model across `/new`, `/resume`, and `/fork`.
