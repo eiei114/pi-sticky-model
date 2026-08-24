@@ -123,7 +123,7 @@ test("docs/health-check.md baseline matches package version and test inventory",
   const version = packageJson.version;
   const { total, perFile } = await countInventoryTests();
 
-  assert.match(healthCheck, /# Maintenance health check \(2026-W32\)/);
+  assert.match(healthCheck, /# Maintenance health check \(2026-W33\)/);
   assert.match(healthCheck, new RegExp(`pi-sticky-model@${version.replace(/\./g, "\\.")}`));
   assert.match(healthCheck, new RegExp(`Entries through ${version.replace(/\./g, "\\.")}`));
   assert.ok(healthCheck.includes(`| Local \`npm run ci\` | ✅ | typecheck + ${total} tests + \`pack:check\` pass |`));

@@ -1,6 +1,6 @@
-# Maintenance health check (2026-W32)
+# Maintenance health check (2026-W33)
 
-Baseline review for `pi-sticky-model@0.4.2` after session-scoped sticky model/thinking persistence, auto-release publish dispatch, and Pi 0.84.x dependency alignment.
+Baseline review for `pi-sticky-model@0.4.2` after the 0.4.2 patch release, TypeScript 7.0.2 alignment, and Pi 0.84.x devDependency refresh.
 
 ## Package completeness (pi-extension-template policy)
 
@@ -23,8 +23,8 @@ Baseline review for `pi-sticky-model@0.4.2` after session-scoped sticky model/th
 |-------|--------|-------|
 | `.github/workflows/ci.yml` | ✅ | `ubuntu-latest`, Node 24, `setup-bun`, `npm ci` + `npm run ci` |
 | Local `npm run ci` | ✅ | typecheck + 39 tests + `pack:check` pass |
-| Latest main CI (GitHub) | ✅ | Green after session-scoped sticky model release (PR #41–#43) |
-| PR CI on recent merges | ✅ | Dependabot and maintenance PRs green before merge |
+| Latest main CI (GitHub) | ✅ | Green after 0.4.2 patch release (PR #52) |
+| PR CI on recent merges | ✅ | Dependabot (#51), TypeScript 7 (#50), and maintenance PRs green before merge |
 
 ## Publish pipeline
 
@@ -61,8 +61,13 @@ Baseline review for `pi-sticky-model@0.4.2` after session-scoped sticky model/th
 
 This health check introduces **no changes** to model persistence logic. Additions are documentation accuracy and smoke-test guardrails only.
 
-## Resolved follow-ups (since W30)
+## Resolved follow-ups (since W32)
 
-- Session-scoped sticky model and thinking level — shipped in 0.4.x (PR #41)
-- Auto-release publish dispatch for `GITHUB_TOKEN` tag limits — aligned in smoke tests and `docs/release.md`
-- Dependabot Pi 0.82.x devDependency group — merged via PR #43
+- 0.4.2 patch release — shipped via PR #52 (2026-08-22 managed OSS batch)
+- TypeScript 7.0.2 devDependency — merged via PR #50
+- Pi 0.84.x devDependency group refresh — merged via PR #51
+- Dynamic health-check test inventory guard — shipped via PR #47
+
+## Docs drift noted (not fixed in this baseline)
+
+- README Release section uses `git push` without `--follow-tags`; `CONTRIBUTING.md` and `docs/release.md` use `git push --follow-tags`. Auto-release on `main` still works via `package.json` push, but tag push guidance is inconsistent.
