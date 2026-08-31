@@ -118,12 +118,20 @@ test("README install pin matches package.json version", async () => {
   assert.match(readme, new RegExp(pin.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
 });
 
+test("README release command matches CONTRIBUTING and docs/release.md", async () => {
+  const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
+  const contributing = await readFile(new URL("../CONTRIBUTING.md", import.meta.url), "utf8");
+  assert.match(readme, /git push --follow-tags/);
+  assert.match(contributing, /git push --follow-tags/);
+  assert.match(releaseDoc, /git push --follow-tags/);
+});
+
 test("docs/health-check.md baseline matches package version and test inventory", async () => {
   const healthCheck = await readFile(new URL("../docs/health-check.md", import.meta.url), "utf8");
   const version = packageJson.version;
   const { total, perFile } = await countInventoryTests();
 
-  assert.match(healthCheck, /# Maintenance health check \(2026-W33\)/);
+  assert.match(healthCheck, /# Maintenance health check \(2026-W35\)/);
   assert.match(healthCheck, new RegExp(`pi-sticky-model@${version.replace(/\./g, "\\.")}`));
   assert.match(healthCheck, new RegExp(`Entries through ${version.replace(/\./g, "\\.")}`));
   assert.ok(healthCheck.includes(`| Local \`npm run ci\` | ✅ | typecheck + ${total} tests + \`pack:check\` pass |`));

@@ -6,6 +6,10 @@ This project follows semantic versioning.
 
 ## Unreleased
 
+### Fixed
+
+- Align README release instructions with `CONTRIBUTING.md` and `docs/release.md` by documenting `git push --follow-tags`.
+
 ## [0.4.2] - 2026-08-22
 
 ### Changed

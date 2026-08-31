@@ -110,7 +110,7 @@ This package is set up for npm Trusted Publishing, so no `NPM_TOKEN` is required
 
 ```bash
 npm version patch
-git push
+git push --follow-tags
 ```
 
 See [`docs/release.md`](docs/release.md) for setup details.
