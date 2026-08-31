@@ -1,6 +1,6 @@
-# Maintenance health check (2026-W33)
+# Maintenance health check (2026-W35)
 
-Baseline review for `pi-sticky-model@0.4.2` after the 0.4.2 patch release, TypeScript 7.0.2 alignment, and Pi 0.84.x devDependency refresh.
+Baseline review for `pi-sticky-model@0.4.2` after README release-command alignment and smoke-test guardrail refresh.
 
 ## Package completeness (pi-extension-template policy)
 
@@ -22,7 +22,7 @@ Baseline review for `pi-sticky-model@0.4.2` after the 0.4.2 patch release, TypeS
 | Check | Status | Notes |
 |-------|--------|-------|
 | `.github/workflows/ci.yml` | ✅ | `ubuntu-latest`, Node 24, `setup-bun`, `npm ci` + `npm run ci` |
-| Local `npm run ci` | ✅ | typecheck + 39 tests + `pack:check` pass |
+| Local `npm run ci` | ✅ | typecheck + 40 tests + `pack:check` pass |
 | Latest main CI (GitHub) | ✅ | Green after 0.4.2 patch release (PR #52) |
 | PR CI on recent merges | ✅ | Dependabot (#51), TypeScript 7 (#50), and maintenance PRs green before merge |
 
@@ -39,10 +39,10 @@ Baseline review for `pi-sticky-model@0.4.2` after the 0.4.2 patch release, TypeS
 
 | File | Tests | Coverage |
 |------|-------|----------|
-| `tests/smoke.test.mjs` | 15 | Package metadata, release workflow contract, policy files, README badges, install pin, health-check baseline |
+| `tests/smoke.test.mjs` | 16 | Package metadata, release workflow contract, policy files, README badges, install pin, release command alignment, health-check baseline |
 | `tests/extension-hooks.test.mjs` | 12 | `model_select`, `thinking_level_select`, `session_start`, `session_shutdown` hooks |
 | `tests/sticky-model.test.mjs` | 12 | `set/get/clear` plus corrupt `globalThis` state guards |
-| **Total** | **39** | **39 pass, 0 fail** |
+| **Total** | **40** | **40 pass, 0 fail** |
 
 ### Coverage gaps (non-trivial)
 
@@ -68,6 +68,6 @@ This health check introduces **no changes** to model persistence logic. Addition
 - Pi 0.84.x devDependency group refresh — merged via PR #51
 - Dynamic health-check test inventory guard — shipped via PR #47
 
-## Docs drift noted (not fixed in this baseline)
+## Resolved follow-ups (since W33)
 
-- README Release section uses `git push` without `--follow-tags`; `CONTRIBUTING.md` and `docs/release.md` use `git push --follow-tags`. Auto-release on `main` still works via `package.json` push, but tag push guidance is inconsistent.
+- README release command alignment — `git push --follow-tags` documented consistently across README, CONTRIBUTING, and `docs/release.md` (2026-W35 maintenance)
