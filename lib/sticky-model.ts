@@ -22,6 +22,9 @@ export interface StickyModelRef {
 /** Module-level flag to log the corrupt-state warning at most once per process. */
 let warnedOnce = false;
 
+/** Cached validated state object; invalidated when globalThis is replaced or cleared. */
+let cachedState: Record<string, unknown> | null = null;
+
 /**
  * Check whether an unknown value is a valid StickyModelRef.
  * A valid ref has `provider` and `model` as non-empty strings.
@@ -70,6 +73,7 @@ export function getStickyModel(sessionKey = DEFAULT_SESSION_KEY): StickyModelRef
 export function clearStickyModel(sessionKey?: string): void {
   if (sessionKey === undefined) {
     delete (globalThis as Record<string, unknown>)[GLOBAL_KEY];
+    cachedState = null;
     return;
   }
   delete getState()[sessionKey];
@@ -77,15 +81,22 @@ export function clearStickyModel(sessionKey?: string): void {
 
 /** Copy a session's model when creating or forking a replacement session. */
 export function copyStickyModel(fromSessionKey: string, toSessionKey: string): void {
-  const sticky = getStickyModel(fromSessionKey);
-  if (sticky) setStickyModel(sticky, toSessionKey);
+  const state = getState();
+  const raw = state[fromSessionKey];
+  if (raw !== undefined && isValidStickyModelRef(raw)) {
+    state[toSessionKey] = raw;
+  }
 }
 
 function getState(): Record<string, unknown> {
   const globals = globalThis as Record<string, unknown>;
   const raw = globals[GLOBAL_KEY];
+  if (cachedState !== null && raw === cachedState) {
+    return cachedState;
+  }
   if (raw && typeof raw === "object" && !Array.isArray(raw)) {
-    return raw as Record<string, unknown>;
+    cachedState = raw as Record<string, unknown>;
+    return cachedState;
   }
   if (raw !== undefined && !warnedOnce) {
     console.warn(
@@ -95,6 +106,7 @@ function getState(): Record<string, unknown> {
   }
   const state: Record<string, unknown> = {};
   globals[GLOBAL_KEY] = state;
+  cachedState = state;
   return state;
 }
 
