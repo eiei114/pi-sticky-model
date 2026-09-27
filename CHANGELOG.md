@@ -1,8 +1,10 @@
 # Changelog
 
-## Unreleased
+All notable changes to this project will be documented in this file.
 
-## [Unreleased]
+This project follows semantic versioning.
+
+## Unreleased
 
 ## [0.4.7] - 2026-09-27
 
@@ -21,6 +23,22 @@ This project follows semantic versioning.
 ### Fixed
 
 - Align README release instructions with `CONTRIBUTING.md` and `docs/release.md` by documenting `git push --follow-tags`.
+## [0.4.6] - 2026-09-28
+
+- chore: periodic patch bump after 7+ days without npm publish
+
+## [0.4.5] - 2026-09-28
+
+- chore: periodic patch bump after 7+ days without npm publish
+
+## [0.4.4] - 2026-09-28
+
+- chore: periodic patch bump after 7+ days without npm publish
+
+## [0.4.3] - 2026-09-28
+
+- chore: periodic patch bump after 7+ days without npm publish
+
 ## [0.4.2] - 2026-08-22
 
 ### Changed
