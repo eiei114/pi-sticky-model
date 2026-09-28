@@ -10,7 +10,7 @@ Baseline review for `pi-sticky-model@0.4.7` after README release-command alignme
 | `CODE_OF_CONDUCT.md` | ✅ | Contributor Covenant reference |
 | `CONTRIBUTING.md` | ✅ | Dev flow, `npm run ci`, release notes |
 | `LICENSE` | ✅ | MIT |
-| `CHANGELOG.md` | ✅ | Entries through 0.4.2 |
+| `CHANGELOG.md` | ✅ | Entries through 0.4.7 |
 | README badges | ✅ | Discord, CI, Publish, npm version/downloads, License, Pi package, Trusted Publishing |
 | `docs/release.md` | ✅ | Trusted Publishing + auto-release dispatch documented |
 | `package.json` `files` | ✅ | `extensions/`, `lib/`, README, LICENSE, CHANGELOG only |
