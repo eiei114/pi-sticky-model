@@ -1,6 +1,6 @@
 # Maintenance health check (2026-W35)
 
-Baseline review for `pi-sticky-model@0.4.2` after README release-command alignment and smoke-test guardrail refresh.
+Baseline review for `pi-sticky-model@0.4.7` after README release-command alignment and smoke-test guardrail refresh.
 
 ## Package completeness (pi-extension-template policy)
 
