@@ -4,8 +4,6 @@ All notable changes to this project will be documented in this file.
 
 This project follows semantic versioning.
 
-## Unreleased
-
 ## [0.4.7] - 2026-09-27
 
 - chore: periodic patch bump after 7+ days without npm publish
@@ -17,12 +15,6 @@ This project follows semantic versioning.
 All notable changes to this project will be documented in this file.
 
 This project follows semantic versioning.
-
-## Unreleased
-
-### Fixed
-
-- Align README release instructions with `CONTRIBUTING.md` and `docs/release.md` by documenting `git push --follow-tags`.
 ## [0.4.6] - 2026-09-28
 
 - chore: periodic patch bump after 7+ days without npm publish
@@ -76,3 +68,5 @@ This project follows semantic versioning.
   - `extensions/index.ts` — `model_select` and `session_start` event hooks
   - Model selection persists across `/new`, `/resume`, `/fork`
   - Model resets to `settings.json` default on Ctrl+C / process exit
+## Unreleased
+
