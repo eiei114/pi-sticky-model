@@ -1,6 +1,6 @@
 {
   "name": "pi-sticky-model",
-  "version": "0.4.8",
+  "version": "0.4.9",
   "description": "Pi extension that keeps your selected model and thinking level across /new, /resume, and /fork. Resets on Ctrl+C.",
   "type": "module",
   "license": "MIT",
@@ -32,7 +32,8 @@
   "scripts": {
     "typecheck": "tsc --noEmit",
     "test": "node --test tests/*.test.mjs",
-    "ci": "npm run typecheck && npm test && npm run pack:check",
+    "smoke:pi": "node scripts/pi-sdk-smoke.mjs",
+    "ci": "npm run typecheck && npm test && npm run smoke:pi && npm run pack:check",
     "pack:check": "npm pack --dry-run"
   },
   "pi": {
@@ -54,10 +55,10 @@
     "protobufjs": ">=7.6.3 <8.0.0"
   },
   "devDependencies": {
-    "@earendil-works/pi-agent-core": "^0.99.2",
-    "@earendil-works/pi-ai": "^0.99.2",
-    "@earendil-works/pi-coding-agent": "^0.99.2",
-    "@earendil-works/pi-tui": "^0.99.2",
+    "@earendil-works/pi-agent-core": "1.1.0",
+    "@earendil-works/pi-ai": "1.1.0",
+    "@earendil-works/pi-coding-agent": "1.1.0",
+    "@earendil-works/pi-tui": "1.1.0",
     "@types/node": "^26.0.0",
     "typebox": "latest",
     "typescript": "^7.0.2"

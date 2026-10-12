@@ -332,6 +332,45 @@ test("session_shutdown clears sticky model state", async () => {
   assert.equal(getStickyModel(), undefined);
 });
 
+test("session_shutdown clears the active session without reading stale context", async () => {
+  const createExtension = await loadExtension();
+  const { api, emit } = createMockAPI();
+  createExtension(api);
+
+  const sessionFile = "/sessions/active.jsonl";
+  const { setStickyModel } = await import("../lib/sticky-model.ts");
+  setStickyModel({ provider: "google", model: "gemini-2.5-pro" }, sessionFile);
+  await emit("session_start", { type: "session_start", reason: "startup" }, {
+    sessionManager: { getSessionFile: () => sessionFile },
+  });
+
+  const staleContext = new Proxy({}, {
+    get() {
+      throw new Error("stale context was accessed");
+    },
+  });
+  await emit("session_shutdown", { type: "session_shutdown", reason: "quit" }, staleContext);
+
+  assert.equal(getStickyModel(sessionFile), undefined);
+});
+
+test("session replacement shutdown preserves the outgoing session state", async () => {
+  const createExtension = await loadExtension();
+  const { api, emit } = createMockAPI();
+  createExtension(api);
+
+  const sessionFile = "/sessions/outgoing.jsonl";
+  const { setStickyModel } = await import("../lib/sticky-model.ts");
+  const sticky = { provider: "google", model: "gemini-2.5-pro" };
+  setStickyModel(sticky, sessionFile);
+  await emit("session_start", { type: "session_start", reason: "startup" }, {
+    sessionManager: { getSessionFile: () => sessionFile },
+  });
+  await emit("session_shutdown", { type: "session_shutdown", reason: "new" }, {});
+
+  assert.deepEqual(getStickyModel(sessionFile), sticky);
+});
+
 test("model_select skips UI updates when hasUI is false", async () => {
   const createExtension = await loadExtension();
   const { api, emit } = createMockAPI();

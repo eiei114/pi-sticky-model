@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 This project follows semantic versioning.
 
+## [0.4.9] - 2026-10-12
+
+### Changed
+
+- Pin Pi SDK development dependencies to 1.1.0 and verify sticky model behavior against the real Pi host.
+
 ## [0.4.8] - 2026-09-30
 
 ### Changed
