@@ -12,7 +12,7 @@ Baseline review for `pi-sticky-model@0.4.9` after Pi SDK 1.1.0 compatibility ver
 | `LICENSE` | ✅ | MIT |
 | `CHANGELOG.md` | ✅ | Entries through 0.4.9 |
 | README badges | ✅ | Discord, CI, Publish, npm version/downloads, License, Pi package, Trusted Publishing |
-| `docs/release.md` | ✅ | Trusted Publishing + auto-release dispatch documented |
+| `docs/release.md` | ✅ | Trusted Publishing + explicitly authorized manual release documented |
 | `package.json` `files` | ✅ | `extensions/`, `lib/`, README, LICENSE, CHANGELOG only |
 | `.editorconfig` | ✅ | Present |
 | `.github/dependabot.yml` | ✅ | npm + github-actions, grouped updates |
@@ -22,7 +22,7 @@ Baseline review for `pi-sticky-model@0.4.9` after Pi SDK 1.1.0 compatibility ver
 | Check | Status | Notes |
 |-------|--------|-------|
 | `.github/workflows/ci.yml` | ✅ | `ubuntu-latest`, Node 24, `setup-bun`, `npm ci` + `npm run ci` |
-| Local `npm run ci` | ✅ | typecheck + 48 unit tests + actual Pi SDK smoke (5/5) + `pack:check` pass |
+| Local `npm run ci` | ✅ | typecheck + 51 unit tests + actual Pi SDK smoke (5/5) + `pack:check` pass |
 | Latest main CI (GitHub) | ✅ | Green after 0.4.2 patch release (PR #52) |
 | PR CI on recent merges | ✅ | Dependabot (#51), TypeScript 7 (#50), and maintenance PRs green before merge |
 
@@ -31,7 +31,7 @@ Baseline review for `pi-sticky-model@0.4.9` after Pi SDK 1.1.0 compatibility ver
 | Check | Status | Notes |
 |-------|--------|-------|
 | `.github/workflows/publish.yml` | ✅ | `id-token: write`, `registry-url`, `npm publish --access public` |
-| `.github/workflows/auto-release.yml` | ✅ | Tags + GitHub Release on `package.json` bump; dispatches `publish.yml` |
+| `.github/workflows/auto-release.yml` | ✅ | Manual-only; both authorization inputs default false and must be enabled to create tags/releases or dispatch `publish.yml` |
 | Trusted Publishing docs | ✅ | No `NPM_TOKEN`; workflow filename documented |
 | npm published version | ✅ | `0.4.2` published to npm |
 
@@ -42,8 +42,9 @@ Baseline review for `pi-sticky-model@0.4.9` after Pi SDK 1.1.0 compatibility ver
 | `tests/smoke.test.mjs` | 16 | Package metadata, release workflow contract, policy files, README badges, install pin, release command alignment, health-check baseline |
 | `tests/extension-hooks.test.mjs` | 14 | `model_select`, `thinking_level_select`, `session_start`, `session_shutdown` hooks, including stale-context regression |
 | `tests/sticky-model.test.mjs` | 12 | `set/get/clear` plus corrupt `globalThis` state guards |
-| `tests/pi-sdk-smoke-contract.test.mjs` | 6 | Positive and deliberately missing RPC response assertions for Pi SDK smoke |
-| **Total** | **48** | **48 pass, 0 fail** |
+| `tests/pi-sdk-smoke-contract.test.mjs` | 8 | Positive and deliberately missing RPC response assertions, temporary report storage, and path redaction |
+| `tests/release-protection.test.mjs` | 1 | Manual-only auto-release trigger and default-off authorization gates |
+| **Total** | **51** | **51 pass, 0 fail** |
 
 ### Coverage gaps (non-trivial)
 
@@ -55,7 +56,7 @@ Baseline review for `pi-sticky-model@0.4.9` after Pi SDK 1.1.0 compatibility ver
 |------|--------|-------|
 | README vs behavior | ✅ | Features match extension code (model + thinking level, session-scoped) |
 | README install pins | ✅ | Example uses `@0.4.9` (guarded by smoke test) |
-| `docs/release.md` vs workflows | ✅ | Auto-release dispatch path documented |
+| `docs/release.md` vs workflows | ✅ | Manual-only, explicitly authorized auto-release path documented |
 | Code comments | ✅ | Extension entrypoint documents event intent |
 
 ## Behavioral change policy

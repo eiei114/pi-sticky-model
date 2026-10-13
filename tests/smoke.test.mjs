@@ -82,8 +82,12 @@ test("publish workflow trigger contract avoids direct main package.json pushes",
   );
 });
 
-test("auto-release version bumps publish exactly once", () => {
-  assert.match(autoReleaseWorkflow, /push:\s*\n\s*branches:\s*\[main\]\s*\n\s*paths:\s*\n\s*- package\.json/);
+test("auto-release requires an explicit manual authorization", () => {
+  assert.match(autoReleaseWorkflow, /workflow_dispatch:/);
+  assert.doesNotMatch(autoReleaseWorkflow, /^\s+push:/m);
+  assert.match(autoReleaseWorkflow, /release_allowed:[\s\S]*?default: false/);
+  assert.match(autoReleaseWorkflow, /package_publish_expected:[\s\S]*?default: false/);
+  assert.match(autoReleaseWorkflow, /inputs\.release_allowed == true && inputs\.package_publish_expected == true/);
   assert.match(autoReleaseWorkflow, /actions:\s*write/);
   assert.match(autoReleaseWorkflow, /git push origin "\$TAG"/);
   assert.match(autoReleaseWorkflow, /gh release create "\$TAG"/);
@@ -92,9 +96,9 @@ test("auto-release version bumps publish exactly once", () => {
 });
 
 test("docs/release.md matches publish workflow triggers", () => {
-  assert.match(releaseDoc, /`package\.json` changes on `main`/);
-  assert.match(releaseDoc, /`\.github\/workflows\/auto-release\.yml`: it creates a matching `v\*\.\*\.\*` tag and GitHub Release/);
-  assert.match(releaseDoc, /explicitly dispatches `publish\.yml` with that tag/);
+  assert.match(releaseDoc, /`\.github\/workflows\/auto-release\.yml` is manual-only/);
+  assert.match(releaseDoc, /explicitly set both `release_allowed` and `package_publish_expected` to `true`/);
+  assert.match(releaseDoc, /dispatches `publish\.yml`/);
   assert.match(releaseDoc, /tag pushed by `GITHUB_TOKEN`/);
 });
 

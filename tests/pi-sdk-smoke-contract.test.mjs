@@ -4,9 +4,12 @@ import test from "node:test";
 import {
   behaviorAssertions,
   parseJsonLines,
+  redactTemporaryPaths,
+  resolveSmokeReportPath,
   SDK_VERSIONS,
   VERIFICATION_CONTRACT,
 } from "../scripts/pi-sdk-smoke-contract.mjs";
+import { resolve } from "node:path";
 
 const response = (id, command, data = {}, success = true) => ({
   id,
@@ -43,6 +46,30 @@ test("JSON line parser keeps valid RPC responses and ignores non-JSON output", (
   assert.deepEqual(parseJsonLines('noise\n{"type":"response","success":true}\n'), [
     { type: "response", success: true },
   ]);
+});
+
+test("smoke report defaults to temporary storage and accepts an explicit repository path", () => {
+  const repositoryRoot = resolve("smoke-test-repository");
+  const temporaryDirectory = resolve("smoke-test-temporary-directory");
+  assert.equal(
+    resolveSmokeReportPath(repositoryRoot, undefined, temporaryDirectory),
+    resolve(temporaryDirectory, "pi-sticky-model-smoke.json"),
+  );
+  assert.equal(
+    resolveSmokeReportPath(repositoryRoot, "docs/verification/pi-sdk-smoke.json", temporaryDirectory),
+    resolve(repositoryRoot, "docs/verification/pi-sdk-smoke.json"),
+  );
+});
+
+test("smoke report redacts nested temporary roots from output and response data", () => {
+  const temporaryRoot = resolve("multica-task-private-root");
+  const report = redactTemporaryPaths({
+    evidence: `Pi session path: ${temporaryRoot}/scenario-agent/sessions/session.jsonl; encoded path: ${temporaryRoot.replaceAll("\\", "\\\\")}\\scenario-agent\\sessions\\session.jsonl`,
+    observed: { sessionFile: `${temporaryRoot}\\scenario-agent\\sessions\\session.jsonl` },
+  }, temporaryRoot);
+  const serialized = JSON.stringify(report);
+  assert.match(serialized, /<SMOKE_TEMP>/);
+  assert.doesNotMatch(serialized, /multica-task-private-root/);
 });
 
 test("positive feature response proves session restore and preserves thinking level", () => {

@@ -7,13 +7,15 @@ import {
   behaviorAssertions,
   EXTENSION_LOAD_ERROR_PATTERN,
   parseJsonLines,
+  redactTemporaryPaths,
+  resolveSmokeReportPath,
   SDK_VERSIONS,
   UNHANDLED_ERROR_PATTERN,
   VERIFICATION_CONTRACT,
 } from "./pi-sdk-smoke-contract.mjs";
 
 const root = resolve(import.meta.dirname, "..");
-const reportPath = resolve(root, "docs/verification/pi-sdk-smoke.json");
+const reportPath = resolveSmokeReportPath(root, process.env.PI_SMOKE_REPORT);
 const manifest = JSON.parse(readFileSync(resolve(root, "package.json"), "utf8"));
 const readJson = (path) => JSON.parse(readFileSync(path, "utf8"));
 const installedVersions = Object.fromEntries(Object.keys(SDK_VERSIONS).map((name) => [
@@ -220,31 +222,33 @@ async function runSessionScenario(scenarioRoot, hostName) {
   });
 }
 
-function reportCase(name, result, extra = {}) {
+function reportCase(name, result, extra = {}, temporaryRoot) {
+  const safeResult = redactTemporaryPaths(result, temporaryRoot);
+  const safeExtra = redactTemporaryPaths(extra, temporaryRoot);
   const assertions = behaviorAssertions(name, {
-    responses: result.responseRows,
-    exit_code: result.exit_code,
-    fullOutput: result.fullOutput,
+    responses: safeResult.responseRows,
+    exit_code: safeResult.exit_code,
+    fullOutput: safeResult.fullOutput,
     expectedVersion: SDK_VERSIONS["@earendil-works/pi-coding-agent"],
-    ...extra,
+    ...safeExtra,
   });
-  const hasUnhandledError = UNHANDLED_ERROR_PATTERN.test(result.fullOutput);
-  const hasLoadError = EXTENSION_LOAD_ERROR_PATTERN.test(result.fullOutput) ||
+  const hasUnhandledError = UNHANDLED_ERROR_PATTERN.test(safeResult.fullOutput);
+  const hasLoadError = EXTENSION_LOAD_ERROR_PATTERN.test(safeResult.fullOutput) ||
     (name === "extension_load" && !assertions.every((item) => item.passed));
-  const evidence = result.fullOutput.length > 12_000
-    ? `${result.fullOutput.slice(0, 12_000)}\n[truncated after full-output assertions]`
-    : result.fullOutput;
+  const evidence = safeResult.fullOutput.length > 12_000
+    ? `${safeResult.fullOutput.slice(0, 12_000)}\n[truncated after full-output assertions]`
+    : safeResult.fullOutput;
   return {
     name,
     command: "npm run smoke:pi",
-    exit_code: result.exit_code,
-    passed: result.exit_code === 0 && !result.timedOut && !result.outputLimitExceeded &&
-      !result.failure && !hasUnhandledError && !hasLoadError && assertions.every((item) => item.passed),
+    exit_code: safeResult.exit_code,
+    passed: safeResult.exit_code === 0 && !safeResult.timedOut && !safeResult.outputLimitExceeded &&
+      !safeResult.failure && !hasUnhandledError && !hasLoadError && assertions.every((item) => item.passed),
     evidence,
     assertions,
     hasUnhandledError,
     hasLoadError,
-    ...(result.failure ? { failure: result.failure } : {}),
+    ...(safeResult.failure ? { failure: safeResult.failure } : {}),
   };
 }
 
@@ -323,16 +327,16 @@ async function main() {
 
     const shellResult = await runHostShell();
     cases = [
-      reportCase("extension_load", loadResult),
-      reportCase("happy_path", happyResult),
-      reportCase("error_path", errorResult),
+      reportCase("extension_load", loadResult, {}, scenarioRoot),
+      reportCase("happy_path", happyResult, {}, scenarioRoot),
+      reportCase("error_path", errorResult, {}, scenarioRoot),
       reportCase("reload_cleanup", reloadResult, {
         reloadedResponses: reloadResult.reloadedResponses,
         reloadedOutput: reloadResult.reloadedOutput,
         firstProcessSessionId: reloadResult.firstProcessSessionId,
         reloadedSessionId: reloadResult.reloadedSessionId,
-      }),
-      reportCase("host_shell", shellResult),
+      }, scenarioRoot),
+      reportCase("host_shell", shellResult, {}, scenarioRoot),
     ];
     const report = {
       schema_version: 1,

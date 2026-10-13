@@ -1,3 +1,6 @@
+import { tmpdir } from "node:os";
+import { resolve } from "node:path";
+
 export const VERIFICATION_CONTRACT = "pi-sdk-behavior-v2";
 export const SDK_VERSIONS = {
   "@earendil-works/pi-agent-core": "1.1.0",
@@ -5,6 +8,35 @@ export const SDK_VERSIONS = {
   "@earendil-works/pi-coding-agent": "1.1.0",
   "@earendil-works/pi-tui": "1.1.0",
 };
+
+export function resolveSmokeReportPath(root, requestedPath, temporaryDirectory = tmpdir()) {
+  return requestedPath?.trim()
+    ? resolve(root, requestedPath)
+    : resolve(temporaryDirectory, "pi-sticky-model-smoke.json");
+}
+
+export function redactTemporaryPaths(value, temporaryRoot) {
+  const variants = new Set([
+    temporaryRoot,
+    temporaryRoot.replaceAll("\\", "/"),
+    temporaryRoot.replaceAll("/", "\\"),
+    temporaryRoot.replaceAll("\\", "\\\\"),
+  ].filter(Boolean));
+  const redactString = (text) => [...variants].reduce((result, path) => {
+    const escapedPath = path.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    return result.replace(new RegExp(escapedPath, "gi"), "<SMOKE_TEMP>");
+  }, text);
+
+  if (typeof value === "string") return redactString(value);
+  if (Array.isArray(value)) return value.map((item) => redactTemporaryPaths(item, temporaryRoot));
+  if (value && typeof value === "object") {
+    return Object.fromEntries(Object.entries(value).map(([key, item]) => [
+      key,
+      redactTemporaryPaths(item, temporaryRoot),
+    ]));
+  }
+  return value;
+}
 
 export const UNHANDLED_ERROR_PATTERN = /UnhandledPromiseRejection|uncaught (?:exception|error)|shutdown error/i;
 export const EXTENSION_LOAD_ERROR_PATTERN = /Failed to load extension|Error loading extension|extension_error/i;
