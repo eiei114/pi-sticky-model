@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
+import { selectPreviousStableTag } from "../scripts/release-tags.mjs";
 
 const workflow = readFileSync(new URL("../.github/workflows/auto-release.yml", import.meta.url), "utf8");
 
@@ -10,4 +11,18 @@ test("auto release is opt-in and requires both release permissions", () => {
   assert.match(workflow, /release_allowed:[\s\S]*?default: false/);
   assert.match(workflow, /package_publish_expected:[\s\S]*?default: false/);
   assert.match(workflow, /if: github\.ref == 'refs\/heads\/main' && inputs\.release_allowed == true && inputs\.package_publish_expected == true/);
+});
+
+test("stable baseline excludes the current tag, prereleases, and unrelated tags", () => {
+  assert.equal(selectPreviousStableTag([
+    "v9.0.0-rc.1", "v1.2.4", "v1.2.3", "v1.2.2", "nightly", "1.0.0",
+  ], "v1.2.4"), "v1.2.3");
+  assert.equal(selectPreviousStableTag(["v1.2.4", "v1.2.3-beta.1", "nightly"], "v1.2.4"), "");
+  assert.equal(selectPreviousStableTag([], "v1.2.4"), "");
+});
+
+test("both release stages use the stable baseline after setting TAG", () => {
+  assert.match(workflow, /TAG="v\$\{CURRENT_VERSION\}"\s+PREVIOUS_TAG=\$\(node scripts\/release-tags\.mjs "\$TAG"\)/);
+  assert.match(workflow, /PREV_TAG=\$\(node scripts\/release-tags\.mjs "\$TAG"\)/);
+  assert.doesNotMatch(workflow, /git tag --sort=-version:refname \| head -1/);
 });

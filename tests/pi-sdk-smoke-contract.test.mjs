@@ -59,6 +59,14 @@ test("smoke report defaults to temporary storage and accepts an explicit reposit
     resolveSmokeReportPath(repositoryRoot, "docs/verification/pi-sdk-smoke.json", temporaryDirectory),
     resolve(repositoryRoot, "docs/verification/pi-sdk-smoke.json"),
   );
+  assert.equal(
+    resolveSmokeReportPath(repositoryRoot, " \tdocs/verification/pi-sdk-smoke.json\n", temporaryDirectory),
+    resolve(repositoryRoot, "docs/verification/pi-sdk-smoke.json"),
+  );
+  assert.equal(
+    resolveSmokeReportPath(repositoryRoot, " \t\n", temporaryDirectory),
+    resolve(temporaryDirectory, "pi-sticky-model-smoke.json"),
+  );
 });
 
 test("smoke report redacts nested temporary roots from output and response data", () => {

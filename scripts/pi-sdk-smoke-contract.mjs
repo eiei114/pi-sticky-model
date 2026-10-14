@@ -10,8 +10,12 @@ export const SDK_VERSIONS = {
 };
 
 export function resolveSmokeReportPath(root, requestedPath, temporaryDirectory = tmpdir()) {
-  return requestedPath?.trim()
-    ? resolve(root, requestedPath)
+  // Trim once and use the trimmed value for both the check and the resolution, so
+  // surrounding whitespace cannot make the run write somewhere other than the
+  // configured path.
+  const requested = requestedPath?.trim();
+  return requested
+    ? resolve(root, requested)
     : resolve(temporaryDirectory, "pi-sticky-model-smoke.json");
 }
 

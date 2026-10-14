@@ -33,9 +33,9 @@ jobs:
         id: check
         shell: bash
         run: |
-          PREVIOUS_TAG=$(git tag --sort=-version:refname | head -1)
           CURRENT_VERSION=$(node -p "require('./package.json').version")
           TAG="v${CURRENT_VERSION}"
+          PREVIOUS_TAG=$(node scripts/release-tags.mjs "$TAG")
 
           if [ -z "$PREVIOUS_TAG" ]; then
             echo "No previous release tag is available; skipping release."
@@ -72,7 +72,7 @@ jobs:
         shell: bash
         run: |
           TAG="${{ steps.check.outputs.tag }}"
-          PREV_TAG=$(git tag --sort=-version:refname | head -1)
+          PREV_TAG=$(node scripts/release-tags.mjs "$TAG")
           NOTES="Released ${TAG}."
           if [ -n "$PREV_TAG" ]; then
             NOTES="${NOTES}\n\n**Full Changelog**: https://github.com/${{ github.repository }}/compare/${PREV_TAG}...${TAG}"
