@@ -1,10 +1,18 @@
 name: Auto Release
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - package.json
+  workflow_dispatch:
+    inputs:
+      release_allowed:
+        description: Explicitly authorize creating a GitHub release for this version.
+        required: true
+        type: boolean
+        default: false
+      package_publish_expected:
+        description: Explicitly authorize dispatching the npm publish workflow.
+        required: true
+        type: boolean
+        default: false
 
 permissions:
   actions: write
@@ -13,6 +21,7 @@ permissions:
 jobs:
   release:
     name: Create release for new version
+    if: github.ref == 'refs/heads/main' && inputs.release_allowed == true && inputs.package_publish_expected == true
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -24,23 +33,23 @@ jobs:
         id: check
         shell: bash
         run: |
-          BEFORE="${{ github.event.before }}"
           CURRENT_VERSION=$(node -p "require('./package.json').version")
           TAG="v${CURRENT_VERSION}"
+          PREVIOUS_TAG=$(node scripts/release-tags.mjs "$TAG")
 
-          if [ -z "$BEFORE" ] || printf '%s' "$BEFORE" | grep -Eq '^0+$'; then
-            echo "No previous commit is available; skipping auto release."
+          if [ -z "$PREVIOUS_TAG" ]; then
+            echo "No previous release tag is available; skipping release."
             echo "released=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
-          if ! git cat-file -e "${BEFORE}:package.json" 2>/dev/null; then
-            echo "Previous package.json is not available; skipping auto release."
+          if ! git cat-file -e "${PREVIOUS_TAG}:package.json" 2>/dev/null; then
+            echo "Previous release package.json is not available; skipping release."
             echo "released=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
-          PREVIOUS_VERSION=$(git show "${BEFORE}:package.json" | node -e "let input=''; process.stdin.on('data', c => input += c); process.stdin.on('end', () => console.log(JSON.parse(input).version || ''));")
+          PREVIOUS_VERSION=$(git show "${PREVIOUS_TAG}:package.json" | node -e "let input=''; process.stdin.on('data', c => input += c); process.stdin.on('end', () => console.log(JSON.parse(input).version || ''));")
 
           if [ "$CURRENT_VERSION" = "$PREVIOUS_VERSION" ]; then
             echo "package.json version did not change (${CURRENT_VERSION}); skipping."
@@ -63,7 +72,7 @@ jobs:
         shell: bash
         run: |
           TAG="${{ steps.check.outputs.tag }}"
-          PREV_TAG=$(git tag --sort=-version:refname | head -1)
+          PREV_TAG=$(node scripts/release-tags.mjs "$TAG")
           NOTES="Released ${TAG}."
           if [ -n "$PREV_TAG" ]; then
             NOTES="${NOTES}\n\n**Full Changelog**: https://github.com/${{ github.repository }}/compare/${PREV_TAG}...${TAG}"

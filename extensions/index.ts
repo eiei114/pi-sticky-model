@@ -10,6 +10,7 @@ import {
 const STATUS_KEY = "sticky-model";
 
 export default function (pi: ExtensionAPI) {
+  let activeSessionKey = "__default__";
   const sessionKey = (ctx: { sessionManager?: { getSessionFile(): string | undefined } }) =>
     (typeof ctx.sessionManager?.getSessionFile === "function"
       ? ctx.sessionManager.getSessionFile()
@@ -17,6 +18,7 @@ export default function (pi: ExtensionAPI) {
 
   // Capture model on explicit user selection
   pi.on("model_select", async (event, ctx) => {
+    activeSessionKey = sessionKey(ctx);
     if (event.source === "restore") return; // don't re-sticky a restored model
 
     const ref: StickyModelRef = {
@@ -33,6 +35,7 @@ export default function (pi: ExtensionAPI) {
   // Capture explicit thinking changes independently from model selection so a
   // replacement tab inherits the complete model configuration.
   pi.on("thinking_level_select", async (event, ctx) => {
+    activeSessionKey = sessionKey(ctx);
     if (!ctx.model) return;
     setStickyModel(
       {
@@ -46,9 +49,10 @@ export default function (pi: ExtensionAPI) {
 
   // Restore sticky model on session transitions
   pi.on("session_start", async (event, ctx) => {
+    activeSessionKey = sessionKey(ctx);
     if (event.reason === "startup") return; // respect settings.json default
 
-    const currentSessionKey = sessionKey(ctx);
+    const currentSessionKey = activeSessionKey;
     if ((event.reason === "new" || event.reason === "fork") && event.previousSessionFile) {
       copyStickyModel(event.previousSessionFile, currentSessionKey);
     }
@@ -91,7 +95,9 @@ export default function (pi: ExtensionAPI) {
     // Keep the old session's value during /new, /resume, and /fork so the
     // replacement session can inherit only from its own predecessor.
     if (!event.reason || event.reason === "quit") {
-      clearStickyModel(sessionKey(ctx));
+      // Session replacement invalidates the old extension context before
+      // shutdown handlers can run. Use the key captured while it was active.
+      clearStickyModel(activeSessionKey);
     }
   });
 }

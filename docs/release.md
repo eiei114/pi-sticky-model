@@ -25,7 +25,9 @@ Publishing runs when:
 - A GitHub Release is published manually
 - The workflow is triggered manually with `workflow_dispatch`
 
-`package.json` changes on `main` are handled by `.github/workflows/auto-release.yml`: it creates a matching `v*.*.*` tag and GitHub Release, then explicitly dispatches `publish.yml` with that tag. GitHub does not start another workflow from a tag pushed by `GITHUB_TOKEN`, so this explicit dispatch is required. `publish.yml` ignores the GitHub Actions-created release event so the auto-release path cannot publish the same version twice.
+`.github/workflows/auto-release.yml` is manual-only; merging a `package.json` version bump does not create a tag, GitHub Release, or publish dispatch. To use that workflow, dispatch it from `main` and explicitly set both `release_allowed` and `package_publish_expected` to `true`. Both inputs default to `false`, and the job is skipped unless both are enabled. Use this only after release and publication are authorized for the package.
+
+The manual auto-release workflow compares the current version with the latest release tag, then creates a matching `v*.*.*` tag and GitHub Release and dispatches `publish.yml`. GitHub does not start another workflow from a tag pushed by `GITHUB_TOKEN`, so this explicit dispatch is required. `publish.yml` ignores the GitHub Actions-created release event so the auto-release path cannot publish the same version twice. The separate `publish.yml` tag and manual triggers remain unchanged.
 
 The workflow skips `name@version` if that exact package version already exists on npm.
 
