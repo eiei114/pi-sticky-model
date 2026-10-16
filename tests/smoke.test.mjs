@@ -138,7 +138,7 @@ test("docs/health-check.md baseline matches package version and test inventory",
   assert.match(healthCheck, /# Maintenance health check \(2026-W42\)/);
   assert.match(healthCheck, new RegExp(`pi-sticky-model@${version.replace(/\./g, "\\.")}`));
   assert.match(healthCheck, new RegExp(`Entries through ${version.replace(/\./g, "\\.")}`));
-  assert.ok(healthCheck.includes(`| Local \`npm run ci\` | ✅ | typecheck + ${total} unit tests + actual Pi SDK smoke (5/5) + \`pack:check\` pass |`));
+  assert.ok(healthCheck.includes(`| Local \`npm run ci\` | ✅ | typecheck + ${total} unit tests + actual Pi SDK 1.2.0 smoke (5/5) + \`pack:check\` pass |`));
   assert.ok(healthCheck.includes(`| **Total** | **${total}** | **${total} pass, 0 fail** |`));
 
   const documented = parseHealthCheckTestInventory(healthCheck);

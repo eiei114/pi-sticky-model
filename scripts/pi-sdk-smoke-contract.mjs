@@ -3,10 +3,10 @@ import { resolve } from "node:path";
 
 export const VERIFICATION_CONTRACT = "pi-sdk-behavior-v2";
 export const SDK_VERSIONS = {
-  "@earendil-works/pi-agent-core": "1.1.0",
-  "@earendil-works/pi-ai": "1.1.0",
-  "@earendil-works/pi-coding-agent": "1.1.0",
-  "@earendil-works/pi-tui": "1.1.0",
+  "@earendil-works/pi-agent-core": "1.2.0",
+  "@earendil-works/pi-ai": "1.2.0",
+  "@earendil-works/pi-coding-agent": "1.2.0",
+  "@earendil-works/pi-tui": "1.2.0",
 };
 
 export function resolveSmokeReportPath(root, requestedPath, temporaryDirectory = tmpdir()) {
@@ -70,7 +70,7 @@ function isRestoredState(state, expected) {
 }
 
 export function behaviorAssertions(name, evidence) {
-  const { responses = [], exit_code, fullOutput = "", expectedVersion = "1.1.0" } = evidence;
+  const { responses = [], exit_code, fullOutput = "", expectedVersion = "1.2.0" } = evidence;
   const state = byId(responses, "restored-state")?.data;
   const modelA = { provider: "sticky-smoke", modelId: "sticky-a", thinkingLevel: "high" };
   const featureObserved = {
