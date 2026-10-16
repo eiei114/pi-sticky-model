@@ -13,12 +13,11 @@ test("auto release is opt-in and requires both release permissions", () => {
   assert.match(workflow, /if: github\.ref == 'refs\/heads\/main' && inputs\.release_allowed == true && inputs\.package_publish_expected == true/);
 });
 
-test("stable baseline excludes the current tag, prereleases, and unrelated tags", () => {
+test("stable baseline selects an older tag, excluding prereleases, current, and future tags", () => {
   assert.equal(selectPreviousStableTag([
-    "v9.0.0-rc.1", "v1.2.4", "v1.2.3", "v1.2.2", "nightly", "1.0.0",
+    "v1.2.5", "v9.0.0-rc.1", "v1.2.4", "v1.2.3", "v1.2.2", "nightly", "1.0.0",
   ], "v1.2.4"), "v1.2.3");
-  assert.equal(selectPreviousStableTag(["v1.2.4", "v1.2.3-beta.1", "nightly"], "v1.2.4"), "");
-  assert.equal(selectPreviousStableTag([], "v1.2.4"), "");
+  assert.equal(selectPreviousStableTag(["v1.2.5", "v1.2.4", "v1.2.4-rc.1"], "v1.2.4"), "");
 });
 
 test("both release stages use the stable baseline after setting TAG", () => {
