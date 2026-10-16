@@ -35,10 +35,10 @@ function featureResponses() {
 test("smoke report contract uses frozen SDK versions", () => {
   assert.equal(VERIFICATION_CONTRACT, "pi-sdk-behavior-v2");
   assert.deepEqual(SDK_VERSIONS, {
-    "@earendil-works/pi-agent-core": "1.1.0",
-    "@earendil-works/pi-ai": "1.1.0",
-    "@earendil-works/pi-coding-agent": "1.1.0",
-    "@earendil-works/pi-tui": "1.1.0",
+    "@earendil-works/pi-agent-core": "1.2.0",
+    "@earendil-works/pi-ai": "1.2.0",
+    "@earendil-works/pi-coding-agent": "1.2.0",
+    "@earendil-works/pi-tui": "1.2.0",
   });
 });
 
@@ -115,7 +115,7 @@ test("host-shell assertion rejects a missing or incorrect pinned CLI version", (
   const incorrect = behaviorAssertions("host_shell", {
     responses: [],
     exit_code: 0,
-    fullOutput: "0.99.2\n",
+    fullOutput: "1.1.0\n",
   });
   assert.equal(missing[0].passed, false);
   assert.equal(incorrect[0].passed, false);

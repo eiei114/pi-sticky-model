@@ -1,6 +1,6 @@
 # Maintenance health check (2026-W42)
 
-Baseline review for `pi-sticky-model@0.4.9` after Pi SDK 1.1.0 compatibility verification.
+Baseline review for `pi-sticky-model@0.4.10` after Pi SDK 1.2.0 compatibility verification.
 
 ## Package completeness (pi-extension-template policy)
 
@@ -10,7 +10,7 @@ Baseline review for `pi-sticky-model@0.4.9` after Pi SDK 1.1.0 compatibility ver
 | `CODE_OF_CONDUCT.md` | ✅ | Contributor Covenant reference |
 | `CONTRIBUTING.md` | ✅ | Dev flow, `npm run ci`, release notes |
 | `LICENSE` | ✅ | MIT |
-| `CHANGELOG.md` | ✅ | Entries through 0.4.9 |
+| `CHANGELOG.md` | ✅ | Entries through 0.4.10 |
 | README badges | ✅ | Discord, CI, Publish, npm version/downloads, License, Pi package, Trusted Publishing |
 | `docs/release.md` | ✅ | Trusted Publishing + explicitly authorized manual release documented |
 | `package.json` `files` | ✅ | `extensions/`, `lib/`, README, LICENSE, CHANGELOG only |
@@ -22,7 +22,7 @@ Baseline review for `pi-sticky-model@0.4.9` after Pi SDK 1.1.0 compatibility ver
 | Check | Status | Notes |
 |-------|--------|-------|
 | `.github/workflows/ci.yml` | ✅ | `ubuntu-latest`, Node 24, `setup-bun`, `npm ci` + `npm run ci` |
-| Local `npm run ci` | ✅ | typecheck + 53 unit tests + actual Pi SDK smoke (5/5) + `pack:check` pass |
+| Local `npm run ci` | ✅ | typecheck + 53 unit tests + actual Pi SDK 1.2.0 smoke (5/5) + `pack:check` pass |
 | Latest main CI (GitHub) | ✅ | Green after 0.4.2 patch release (PR #52) |
 | PR CI on recent merges | ✅ | Dependabot (#51), TypeScript 7 (#50), and maintenance PRs green before merge |
 
@@ -55,13 +55,13 @@ Baseline review for `pi-sticky-model@0.4.9` after Pi SDK 1.1.0 compatibility ver
 | Area | Status | Notes |
 |------|--------|-------|
 | README vs behavior | ✅ | Features match extension code (model + thinking level, session-scoped) |
-| README install pins | ✅ | Example uses `@0.4.9` (guarded by smoke test) |
+| README install pins | ✅ | Example uses `@0.4.10` (guarded by smoke test) |
 | `docs/release.md` vs workflows | ✅ | Manual-only, explicitly authorized auto-release path documented |
 | Code comments | ✅ | Extension entrypoint documents event intent |
 
 ## Behavioral change policy
 
-This update preserves public behavior while fixing Pi 1.1.0's stale-context shutdown error and adding actual-host regression coverage for per-session model/thinking restoration.
+This update preserves public behavior while verifying the existing session lifecycle hooks against Pi 1.2.0. The upstream release notes describe changes to `before_agent_start` and configuration schemas; this extension does not use those APIs, so no API migration was needed.
 
 ## Resolved follow-ups (since W32)
 
