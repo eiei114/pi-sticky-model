@@ -20,6 +20,12 @@ test("stable baseline selects an older tag, excluding prereleases, current, and 
   assert.equal(selectPreviousStableTag(["v1.2.5", "v1.2.4", "v1.2.4-rc.1"], "v1.2.4"), "");
 });
 
+test("stable baseline uses numeric ordering instead of Git's version-refname ordering", () => {
+  assert.equal(selectPreviousStableTag([
+    "v1.10.0", "v1.2.0", "v1.09.0",
+  ], "v1.10.0"), "v1.09.0");
+});
+
 test("both release stages use the stable baseline after setting TAG", () => {
   assert.match(workflow, /TAG="v\$\{CURRENT_VERSION\}"\s+PREVIOUS_TAG=\$\(node scripts\/release-tags\.mjs "\$TAG"\)/);
   assert.match(workflow, /PREV_TAG=\$\(node scripts\/release-tags\.mjs "\$TAG"\)/);

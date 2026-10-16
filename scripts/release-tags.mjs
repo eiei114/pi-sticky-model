@@ -16,9 +16,11 @@ function compareStableTags(leftTag, rightTag) {
   return 0;
 }
 
-/** Select the newest stable baseline strictly older than current from git's descending tag list. */
+/** Select the newest stable baseline strictly older than current. */
 export function selectPreviousStableTag(tags, currentTag) {
-  return tags.find((tag) => compareStableTags(tag, currentTag) === -1) ?? "";
+  return tags
+    .filter((tag) => compareStableTags(tag, currentTag) === -1)
+    .sort((leftTag, rightTag) => compareStableTags(rightTag, leftTag))[0] ?? "";
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
