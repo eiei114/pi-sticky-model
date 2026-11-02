@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
 import test from "node:test";
 
 import {
@@ -6,10 +7,14 @@ import {
   parseJsonLines,
   redactTemporaryPaths,
   resolveSmokeReportPath,
-  SDK_VERSIONS,
+  SDK_PACKAGE_NAMES,
+  sdkVersionsFromManifest,
   VERIFICATION_CONTRACT,
 } from "../scripts/pi-sdk-smoke-contract.mjs";
 import { resolve } from "node:path";
+
+const packageManifest = JSON.parse(await readFile(new URL("../package.json", import.meta.url), "utf8"));
+const sdkVersions = sdkVersionsFromManifest(packageManifest);
 
 const response = (id, command, data = {}, success = true) => ({
   id,
@@ -32,14 +37,14 @@ function featureResponses() {
   ];
 }
 
-test("smoke report contract uses frozen SDK versions", () => {
+test("smoke report contract derives SDK versions from package manifest pins", () => {
   assert.equal(VERIFICATION_CONTRACT, "pi-sdk-behavior-v2");
-  assert.deepEqual(SDK_VERSIONS, {
-    "@earendil-works/pi-agent-core": "1.2.0",
-    "@earendil-works/pi-ai": "1.2.0",
-    "@earendil-works/pi-coding-agent": "1.2.0",
-    "@earendil-works/pi-tui": "1.2.0",
-  });
+  assert.deepEqual(Object.keys(sdkVersions), SDK_PACKAGE_NAMES);
+  assert.deepEqual(sdkVersions, Object.fromEntries(SDK_PACKAGE_NAMES.map((name) => [
+    name,
+    packageManifest.devDependencies[name],
+  ])));
+  assert.throws(() => sdkVersionsFromManifest({ devDependencies: {} }), /Missing exact Pi SDK devDependency pin/);
 });
 
 test("JSON line parser keeps valid RPC responses and ignores non-JSON output", () => {
@@ -111,12 +116,26 @@ test("handled-error assertion rejects a missing or unexpected negative response"
 });
 
 test("host-shell assertion rejects a missing or incorrect pinned CLI version", () => {
-  const missing = behaviorAssertions("host_shell", { responses: [], exit_code: 0, fullOutput: "" });
+  const expectedVersion = sdkVersions["@earendil-works/pi-coding-agent"];
+  const missing = behaviorAssertions("host_shell", {
+    responses: [],
+    exit_code: 0,
+    fullOutput: "",
+    expectedVersion,
+  });
   const incorrect = behaviorAssertions("host_shell", {
     responses: [],
     exit_code: 0,
-    fullOutput: "1.1.0\n",
+    fullOutput: `${expectedVersion}.wrong\n`,
+    expectedVersion,
   });
   assert.equal(missing[0].passed, false);
   assert.equal(incorrect[0].passed, false);
+  const correct = behaviorAssertions("host_shell", {
+    responses: [],
+    exit_code: 0,
+    fullOutput: `${expectedVersion}\n`,
+    expectedVersion,
+  });
+  assert.equal(correct[0].passed, true);
 });
