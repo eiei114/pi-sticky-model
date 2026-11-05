@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { access, readdir, readFile } from "node:fs/promises";
 import test from "node:test";
+import { sdkVersionsFromManifest } from "../scripts/pi-sdk-smoke-contract.mjs";
 
 const POLICY_FILES = [
   "SECURITY.md",
@@ -11,6 +12,7 @@ const POLICY_FILES = [
 ];
 
 const packageJson = JSON.parse(await readFile(new URL("../package.json", import.meta.url), "utf8"));
+const sdkVersions = sdkVersionsFromManifest(packageJson);
 const publishWorkflow = await readFile(new URL("../.github/workflows/publish.yml", import.meta.url), "utf8");
 const autoReleaseWorkflow = await readFile(new URL("../.github/workflows/auto-release.yml", import.meta.url), "utf8");
 const releaseDoc = await readFile(new URL("../docs/release.md", import.meta.url), "utf8");
@@ -135,10 +137,10 @@ test("docs/health-check.md baseline matches package version and test inventory",
   const version = packageJson.version;
   const { total, perFile } = await countInventoryTests();
 
-  assert.match(healthCheck, /# Maintenance health check \(2026-W42\)/);
+  assert.match(healthCheck, /# Maintenance health check \(2026-W45\)/);
   assert.match(healthCheck, new RegExp(`pi-sticky-model@${version.replace(/\./g, "\\.")}`));
   assert.match(healthCheck, new RegExp(`Entries through ${version.replace(/\./g, "\\.")}`));
-  assert.ok(healthCheck.includes(`| Local \`npm run ci\` | ✅ | typecheck + ${total} unit tests + actual Pi SDK 1.2.0 smoke (5/5) + \`pack:check\` pass |`));
+  assert.ok(healthCheck.includes(`| Local \`npm run ci\` | ✅ | typecheck + ${total} unit tests + actual Pi SDK ${sdkVersions["@earendil-works/pi-coding-agent"]} smoke (5/5) + \`pack:check\` pass |`));
   assert.ok(healthCheck.includes(`| **Total** | **${total}** | **${total} pass, 0 fail** |`));
 
   const documented = parseHealthCheckTestInventory(healthCheck);

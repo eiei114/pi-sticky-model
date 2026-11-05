@@ -9,7 +9,8 @@ import {
   parseJsonLines,
   redactTemporaryPaths,
   resolveSmokeReportPath,
-  SDK_VERSIONS,
+  SDK_PACKAGE_NAMES,
+  sdkVersionsFromManifest,
   UNHANDLED_ERROR_PATTERN,
   VERIFICATION_CONTRACT,
 } from "./pi-sdk-smoke-contract.mjs";
@@ -17,13 +18,14 @@ import {
 const root = resolve(import.meta.dirname, "..");
 const reportPath = resolveSmokeReportPath(root, process.env.PI_SMOKE_REPORT);
 const manifest = JSON.parse(readFileSync(resolve(root, "package.json"), "utf8"));
+const sdkVersions = sdkVersionsFromManifest(manifest);
 const readJson = (path) => JSON.parse(readFileSync(path, "utf8"));
-const installedVersions = Object.fromEntries(Object.keys(SDK_VERSIONS).map((name) => [
+const installedVersions = Object.fromEntries(SDK_PACKAGE_NAMES.map((name) => [
   name,
   readJson(resolve(root, "node_modules", name, "package.json")).version,
 ]));
 
-for (const [name, expected] of Object.entries(SDK_VERSIONS)) {
+for (const [name, expected] of Object.entries(sdkVersions)) {
   if (manifest.devDependencies?.[name] !== expected || installedVersions[name] !== expected) {
     throw new Error(`Smoke requires exact Pi SDK ${name}=${expected}; manifest=${manifest.devDependencies?.[name]}, installed=${installedVersions[name]}`);
   }
@@ -229,7 +231,7 @@ function reportCase(name, result, extra = {}, temporaryRoot) {
     responses: safeResult.responseRows,
     exit_code: safeResult.exit_code,
     fullOutput: safeResult.fullOutput,
-    expectedVersion: SDK_VERSIONS["@earendil-works/pi-coding-agent"],
+    expectedVersion: sdkVersions["@earendil-works/pi-coding-agent"],
     ...safeExtra,
   });
   const hasUnhandledError = UNHANDLED_ERROR_PATTERN.test(safeResult.fullOutput);
@@ -253,7 +255,7 @@ function reportCase(name, result, extra = {}, temporaryRoot) {
 }
 
 async function runHostShell() {
-  const expectedVersion = SDK_VERSIONS["@earendil-works/pi-coding-agent"];
+  const expectedVersion = sdkVersions["@earendil-works/pi-coding-agent"];
   let executable;
   let args;
   if (process.platform === "win32") {
