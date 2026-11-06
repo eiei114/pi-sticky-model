@@ -2,12 +2,22 @@ import { tmpdir } from "node:os";
 import { resolve } from "node:path";
 
 export const VERIFICATION_CONTRACT = "pi-sdk-behavior-v2";
-export const SDK_VERSIONS = {
-  "@earendil-works/pi-agent-core": "1.2.0",
-  "@earendil-works/pi-ai": "1.2.0",
-  "@earendil-works/pi-coding-agent": "1.2.0",
-  "@earendil-works/pi-tui": "1.2.0",
-};
+export const SDK_PACKAGE_NAMES = [
+  "@earendil-works/pi-agent-core",
+  "@earendil-works/pi-ai",
+  "@earendil-works/pi-coding-agent",
+  "@earendil-works/pi-tui",
+];
+
+export function sdkVersionsFromManifest(manifest) {
+  return Object.fromEntries(SDK_PACKAGE_NAMES.map((name) => {
+    const version = manifest.devDependencies?.[name];
+    if (typeof version !== "string" || version.length === 0) {
+      throw new Error(`Missing exact Pi SDK devDependency pin: ${name}`);
+    }
+    return [name, version];
+  }));
+}
 
 export function resolveSmokeReportPath(root, requestedPath, temporaryDirectory = tmpdir()) {
   // Trim once and use the trimmed value for both the check and the resolution, so
@@ -70,7 +80,7 @@ function isRestoredState(state, expected) {
 }
 
 export function behaviorAssertions(name, evidence) {
-  const { responses = [], exit_code, fullOutput = "", expectedVersion = "1.2.0" } = evidence;
+  const { responses = [], exit_code, fullOutput = "", expectedVersion } = evidence;
   const state = byId(responses, "restored-state")?.data;
   const modelA = { provider: "sticky-smoke", modelId: "sticky-a", thinkingLevel: "high" };
   const featureObserved = {

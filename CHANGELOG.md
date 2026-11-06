@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 This project follows semantic versioning.
 
+## [0.4.11] - 2026-11-05
+
+### Changed
+
+- Pin Pi SDK development dependencies to 1.4.0 and derive smoke expectations from the manifest pins.
+
 ## [0.4.10] - 2026-10-16
 
 ### Changed
