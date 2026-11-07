@@ -8,7 +8,7 @@
 [![npm downloads](https://img.shields.io/npm/dm/pi-sticky-model.svg)](https://www.npmjs.com/package/pi-sticky-model)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Pi package](https://img.shields.io/badge/pi-package-purple.svg)](https://pi.dev/packages)
-[![Trusted Publishing](https://img.shields.io/badge/npm-Trusted%20Publishing-blue.svg)](docs/release.md)
+[![Trusted Publishing](https://img.shields.io/badge/npm-Trusted%20Publishing-blue.svg)](https://github.com/eiei114/pi-sticky-model/blob/main/docs/release.md)
 <a href="https://buymeacoffee.com/ekawano114m"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" width="217" height="60"></a>
 
 > Keeps your model and thinking-level selections across `/new`, `/resume`, and `/fork` without mixing settings between sessions. Resets on Ctrl+C — no settings.json override needed.
@@ -42,7 +42,7 @@ pi install npm:pi-sticky-model
 Pin a specific version when you want reproducible installs:
 
 ```bash
-pi install npm:pi-sticky-model@0.4.11
+pi install npm:pi-sticky-model@0.4.12
 ```
 
 Install into the current project instead of your user Pi settings:
@@ -113,18 +113,18 @@ npm version patch
 git push --follow-tags
 ```
 
-See [`docs/release.md`](docs/release.md) for setup details.
+See [`docs/release.md`](https://github.com/eiei114/pi-sticky-model/blob/main/docs/release.md) for setup details.
 
 ## Docs
 
-- [`docs/release.md`](docs/release.md) — Trusted Publishing setup details
-- [`docs/health-check.md`](docs/health-check.md) — Maintenance health check baseline
+- [`docs/release.md`](https://github.com/eiei114/pi-sticky-model/blob/main/docs/release.md) — Trusted Publishing setup details
+- [`docs/health-check.md`](https://github.com/eiei114/pi-sticky-model/blob/main/docs/health-check.md) — Maintenance health check baseline
 
 ## Security
 
 Pi packages can execute code with your local permissions. Review extensions before installing third-party packages.
 
-For vulnerability reporting, see [`SECURITY.md`](SECURITY.md).
+For vulnerability reporting, see [`SECURITY.md`](https://github.com/eiei114/pi-sticky-model/blob/main/SECURITY.md).
 
 ## Links
 
