@@ -84,7 +84,14 @@ export function copyStickyModel(fromSessionKey: string, toSessionKey: string): v
   const state = getState();
   const raw = state[fromSessionKey];
   if (raw !== undefined && isValidStickyModelRef(raw)) {
-    state[toSessionKey] = { ...raw };
+    const copy: StickyModelRef = {
+      provider: raw.provider,
+      model: raw.model,
+    };
+    if (raw.thinkingLevel !== undefined) {
+      copy.thinkingLevel = raw.thinkingLevel;
+    }
+    state[toSessionKey] = copy;
   }
 }
 

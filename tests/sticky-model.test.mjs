@@ -178,6 +178,42 @@ test("copyStickyModel copies a valid ref independently and leaves other sessions
   assert.equal(getStickyModel("unrelated").model, "claude-sonnet-4");
 });
 
+test("copyStickyModel preserves valid inherited and non-enumerable ref fields", () => {
+  const inheritedRef = Object.create({
+    provider: "google",
+    model: "gemini-2.5-pro",
+    thinkingLevel: "high",
+  });
+  const nonEnumerableRef = {};
+  Object.defineProperties(nonEnumerableRef, {
+    provider: { value: "openai" },
+    model: { value: "gpt-5.4" },
+    thinkingLevel: { value: "medium" },
+  });
+
+  for (const [sourceKey, sourceRef, expected] of [
+    ["inherited", inheritedRef, { provider: "google", model: "gemini-2.5-pro", thinkingLevel: "high" }],
+    ["non-enumerable", nonEnumerableRef, { provider: "openai", model: "gpt-5.4", thinkingLevel: "medium" }],
+  ]) {
+    const destinationRef = { provider: "anthropic", model: "claude-sonnet-4" };
+    const unrelatedRef = { provider: "deepseek", model: "deepseek-v4-pro" };
+    globalThis[GLOBAL_KEY] = {
+      [sourceKey]: sourceRef,
+      destination: destinationRef,
+      unrelated: unrelatedRef,
+    };
+
+    assert.strictEqual(getStickyModel(sourceKey), sourceRef);
+    copyStickyModel(sourceKey, "destination");
+
+    const copiedRef = getStickyModel("destination");
+    assert.deepEqual(copiedRef, expected);
+    assert.deepEqual(Object.keys(copiedRef), ["provider", "model", "thinkingLevel"]);
+    assert.notStrictEqual(copiedRef, sourceRef);
+    assert.strictEqual(getStickyModel("unrelated"), unrelatedRef);
+  }
+});
+
 test("copyStickyModel is a no-op when the source session is missing", () => {
   const destinationRef = { provider: "openai", model: "gpt-5.4" };
   const unrelatedRef = { provider: "anthropic", model: "claude-sonnet-4" };
