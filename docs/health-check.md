@@ -1,6 +1,6 @@
 # Maintenance health check (2026-W45)
 
-Compatibility verification for `pi-sticky-model@0.4.12` with Pi SDK 1.5.0.
+Compatibility verification for `pi-sticky-model@0.4.13` with Pi SDK 1.5.2.
 
 ## Package completeness (pi-extension-template policy)
 
@@ -10,7 +10,7 @@ Compatibility verification for `pi-sticky-model@0.4.12` with Pi SDK 1.5.0.
 | `CODE_OF_CONDUCT.md` | ✅ | Contributor Covenant reference |
 | `CONTRIBUTING.md` | ✅ | Dev flow, `npm run ci`, release notes |
 | `LICENSE` | ✅ | MIT |
-| `CHANGELOG.md` | ✅ | Entries through 0.4.12 |
+| `CHANGELOG.md` | ✅ | Entries through 0.4.13 |
 | README badges | ✅ | Discord, CI, Publish, npm version/downloads, License, Pi package, Trusted Publishing |
 | `docs/release.md` | ✅ | Trusted Publishing + explicitly authorized manual release documented |
 | `package.json` `files` | ✅ | `extensions/`, `lib/`, README, LICENSE, CHANGELOG only |
@@ -22,7 +22,7 @@ Compatibility verification for `pi-sticky-model@0.4.12` with Pi SDK 1.5.0.
 | Check | Status | Notes |
 |-------|--------|-------|
 | `.github/workflows/ci.yml` | ✅ | `ubuntu-latest`, Node 24, `setup-bun`, `npm ci` + `npm run ci` |
-| Local `npm run ci` | ✅ | typecheck + 54 unit tests + actual Pi SDK 1.5.0 smoke (5/5) + `pack:check` pass |
+| Local `npm run ci` | ✅ | typecheck + 54 unit tests + actual Pi SDK 1.5.2 smoke (5/5) + `pack:check` pass |
 | Latest main CI (GitHub) | ✅ | Green after 0.4.2 patch release (PR #52) |
 | PR CI on recent merges | ✅ | Dependabot (#51), TypeScript 7 (#50), and maintenance PRs green before merge |
 
@@ -55,13 +55,13 @@ Compatibility verification for `pi-sticky-model@0.4.12` with Pi SDK 1.5.0.
 | Area | Status | Notes |
 |------|--------|-------|
 | README vs behavior | ✅ | Features match extension code (model + thinking level, session-scoped) |
-| README install pins | ✅ | Example uses `@0.4.12` (guarded by smoke test) |
+| README install pins | ✅ | Example uses `@0.4.13` (guarded by smoke test) |
 | `docs/release.md` vs workflows | ✅ | Manual-only, explicitly authorized auto-release path documented |
 | Code comments | ✅ | Extension entrypoint documents event intent |
 
 ## Behavioral change policy
 
-This update preserves public behavior while verifying the existing session lifecycle hooks against Pi 1.5.0. The extension uses no APIs affected by the 1.5.0 migration notes, and the actual Pi host smoke verifies its session lifecycle behavior.
+This update preserves public behavior while verifying the existing session lifecycle hooks against Pi 1.5.2. The extension uses no APIs affected by the 1.5.2 migration notes, and the actual Pi host smoke verifies its session lifecycle behavior.
 
 ## Resolved follow-ups (since W32)
 

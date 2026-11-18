@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 This project follows semantic versioning.
 
+## [0.4.13] - 2026-11-17
+
+### Changed
+
+- Pin Pi SDK development dependencies to 1.5.2 and refresh the health-check baseline, README install pin, and Pi SDK verification report.
+
 ## [0.4.12] - 2026-11-07
 
 ### Changed
