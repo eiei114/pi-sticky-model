@@ -140,6 +140,13 @@ test("docs/health-check.md baseline matches package version and test inventory",
   assert.match(healthCheck, /# Maintenance health check \(2026-W45\)/);
   assert.match(healthCheck, new RegExp(`pi-sticky-model@${version.replace(/\./g, "\\.")}`));
   assert.match(healthCheck, new RegExp(`Entries through ${version.replace(/\./g, "\\.")}`));
+  const npmPublishedVersionRow = healthCheck
+    .split("\n")
+    .find((line) => line.startsWith("| npm published version |"));
+  assert.ok(
+    npmPublishedVersionRow?.includes(`\`${version}\``),
+    `health-check.md npm published version row must include \`${version}\``,
+  );
   assert.ok(healthCheck.includes(`| Local \`npm run ci\` | ✅ | typecheck + ${total} unit tests + actual Pi SDK ${sdkVersions["@earendil-works/pi-coding-agent"]} smoke (5/5) + \`pack:check\` pass |`));
   assert.ok(healthCheck.includes(`| **Total** | **${total}** | **${total} pass, 0 fail** |`));
 

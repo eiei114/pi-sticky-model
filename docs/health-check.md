@@ -33,7 +33,7 @@ Compatibility verification for `pi-sticky-model@0.4.13` with Pi SDK 1.5.2.
 | `.github/workflows/publish.yml` | ✅ | `id-token: write`, `registry-url`, `npm publish --access public` |
 | `.github/workflows/auto-release.yml` | ✅ | Manual-only; both authorization inputs default false and must be enabled to create tags/releases or dispatch `publish.yml` |
 | Trusted Publishing docs | ✅ | No `NPM_TOKEN`; workflow filename documented |
-| npm published version | ✅ | `0.4.2` published to npm |
+| npm published version | ✅ | Package version: `0.4.13`; latest published to npm: `0.4.12` |
 
 ## Test inventory
 
