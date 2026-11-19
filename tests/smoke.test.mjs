@@ -143,9 +143,11 @@ test("docs/health-check.md baseline matches package version and test inventory",
   const npmPublishedVersionRow = healthCheck
     .split("\n")
     .find((line) => line.startsWith("| npm published version |"));
-  assert.ok(
-    npmPublishedVersionRow?.includes(`\`${version}\``),
-    `health-check.md npm published version row must include \`${version}\``,
+  const documentedPackageVersion = npmPublishedVersionRow?.match(/\bPackage version:\s*`([^`]+)`/)?.[1];
+  assert.equal(
+    documentedPackageVersion,
+    version,
+    `health-check.md npm published version row must set Package version to \`${version}\``,
   );
   assert.ok(healthCheck.includes(`| Local \`npm run ci\` | ✅ | typecheck + ${total} unit tests + actual Pi SDK ${sdkVersions["@earendil-works/pi-coding-agent"]} smoke (5/5) + \`pack:check\` pass |`));
   assert.ok(healthCheck.includes(`| **Total** | **${total}** | **${total} pass, 0 fail** |`));
