@@ -1,7 +1,7 @@
 /** Lightweight mock ExtensionAPI / context harness for extension hook tests. */
 
 /**
- * @param {{ setModelResult?: boolean, thinkingLevel?: string }} [options]
+ * @param {{ setModelResult?: boolean | ((model: unknown) => boolean), thinkingLevel?: string }} [options]
  */
 export function createMockAPI(options = {}) {
   const { setModelResult = true, thinkingLevel = "medium" } = options;
@@ -23,7 +23,9 @@ export function createMockAPI(options = {}) {
     async setModel(model) {
       setModelCalls.push(model);
       callLog.push({ method: "setModel", value: model });
-      return setModelResult;
+      return typeof setModelResult === "function"
+        ? setModelResult(model)
+        : setModelResult;
     },
     getThinkingLevel() {
       return thinkingLevel;
@@ -75,14 +77,22 @@ export function createMockModelRegistry(models = []) {
 }
 
 /**
- * @param {{ ui: object, modelRegistry: object, sessionFile?: string }} params
+ * @param {{ ui: object, modelRegistry: object, sessionFile?: string, omitSessionManager?: boolean }} params
  */
-export function createMockContext({ ui, modelRegistry, sessionFile, model }) {
+export function createMockContext({
+  ui,
+  modelRegistry,
+  sessionFile,
+  model,
+  omitSessionManager = false,
+}) {
   return {
     ui,
     hasUI: true,
     cwd: "/tmp",
-    sessionManager: sessionFile === undefined ? {} : { getSessionFile: () => sessionFile },
+    ...(omitSessionManager
+      ? {}
+      : { sessionManager: sessionFile === undefined ? {} : { getSessionFile: () => sessionFile } }),
     modelRegistry,
     model,
     isIdle: () => true,

@@ -98,6 +98,61 @@ test("thinking_level_select stores the active model and thinking level", async (
   });
 });
 
+test("thinking_level_select does not store anything when there is no active model", async () => {
+  const createExtension = await loadExtension();
+  const { api, emit } = createMockAPI();
+  const { ui } = createMockUI();
+  const ctx = createMockContext({
+    ui,
+    modelRegistry: createMockModelRegistry(),
+  });
+
+  createExtension(api);
+  await emit(
+    "thinking_level_select",
+    { type: "thinking_level_select", level: "high", previousLevel: "medium" },
+    ctx,
+  );
+
+  assert.equal(getStickyModel(), undefined);
+});
+
+test("events without a session manager share the __default__ sticky model", async () => {
+  const createExtension = await loadExtension();
+  const { api, emit } = createMockAPI();
+  const { ui } = createMockUI();
+  const model = makeModel("openai", "gpt-5.4");
+  const ctx = createMockContext({
+    ui,
+    model,
+    modelRegistry: createMockModelRegistry([model]),
+    omitSessionManager: true,
+  });
+
+  createExtension(api);
+  await emit(
+    "model_select",
+    {
+      type: "model_select",
+      model,
+      previousModel: undefined,
+      source: "set",
+    },
+    ctx,
+  );
+  await emit(
+    "thinking_level_select",
+    { type: "thinking_level_select", level: "high", previousLevel: "medium" },
+    ctx,
+  );
+
+  assert.deepEqual(getStickyModel("__default__"), {
+    provider: model.provider,
+    model: model.id,
+    thinkingLevel: "high",
+  });
+});
+
 test("session_start restores sticky model on new, resume, and fork", async () => {
   const createExtension = await loadExtension();
   const sticky = { provider: "google", model: "gemini-2.5-pro" };
@@ -134,6 +189,65 @@ test("session_start restores sticky model on new, resume, and fork", async () =>
       true,
       `reason=${reason}`,
     );
+  }
+});
+
+test("session_start restores the current model on reload", async () => {
+  const createExtension = await loadExtension();
+  const { setStickyModel } = await import("../lib/sticky-model.ts");
+  const model = makeModel("google", "gemini-2.5-pro");
+  const sessionFile = "/sessions/reloaded.jsonl";
+  setStickyModel(
+    { provider: model.provider, model: model.id, thinkingLevel: "high" },
+    sessionFile,
+  );
+
+  const { api, emit, setModelCalls, setThinkingLevelCalls } = createMockAPI();
+  const { ui, status, notifications } = createMockUI();
+  const ctx = createMockContext({
+    ui,
+    sessionFile,
+    modelRegistry: createMockModelRegistry([model]),
+  });
+
+  createExtension(api);
+  await emit("session_start", { type: "session_start", reason: "reload" }, ctx);
+
+  assert.deepEqual(setModelCalls, [model]);
+  assert.deepEqual(setThinkingLevelCalls, ["high"]);
+  assert.equal(status.get("sticky-model"), "sticky: google/gemini-2.5-pro");
+  assert.equal(
+    notifications.some((n) => n.message === "Restored sticky model: google/gemini-2.5-pro"),
+    true,
+  );
+});
+
+test("session_start restores in-memory new and fork sessions without a previous session file", async () => {
+  const createExtension = await loadExtension();
+  const { setStickyModel } = await import("../lib/sticky-model.ts");
+  const model = makeModel("openai", "gpt-5.4");
+  const sticky = { provider: model.provider, model: model.id, thinkingLevel: "high" };
+  setStickyModel(sticky, "__default__");
+
+  for (const reason of ["new", "fork"]) {
+    const { api, emit, setModelCalls, setThinkingLevelCalls } = createMockAPI();
+    const { ui } = createMockUI();
+    const ctx = createMockContext({
+      ui,
+      modelRegistry: createMockModelRegistry([model]),
+      omitSessionManager: true,
+    });
+
+    createExtension(api);
+    await emit(
+      "session_start",
+      { type: "session_start", reason, previousSessionFile: undefined },
+      ctx,
+    );
+
+    assert.deepEqual(setModelCalls, [model], `reason=${reason}`);
+    assert.deepEqual(setThinkingLevelCalls, ["high"], `reason=${reason}`);
+    assert.deepEqual(getStickyModel("__default__"), sticky, `reason=${reason}`);
   }
 });
 
@@ -296,6 +410,48 @@ test("session_start warns when pi.setModel returns false", async () => {
   ]);
 });
 
+test("session_start skips thinking restore after failure and keeps the value for retry", async () => {
+  const createExtension = await loadExtension();
+  const { setStickyModel } = await import("../lib/sticky-model.ts");
+  const sticky = {
+    provider: "google",
+    model: "gemini-2.5-pro",
+    thinkingLevel: "high",
+  };
+  setStickyModel(sticky);
+
+  const registryModel = makeModel(sticky.provider, sticky.model);
+  const results = [false, true];
+  const { api, emit, setModelCalls, setThinkingLevelCalls } = createMockAPI({
+    setModelResult: () => results.shift() ?? true,
+  });
+  const { ui, notifications } = createMockUI();
+  const ctx = createMockContext({
+    ui,
+    modelRegistry: createMockModelRegistry([registryModel]),
+  });
+
+  createExtension(api);
+
+  await emit("session_start", { type: "session_start", reason: "resume" }, ctx);
+
+  assert.deepEqual(setModelCalls, [registryModel]);
+  assert.deepEqual(setThinkingLevelCalls, []);
+  assert.deepEqual(getStickyModel(), sticky);
+  assert.deepEqual(notifications, [
+    {
+      message: "pi-sticky-model: failed to restore google/gemini-2.5-pro",
+      type: "warning",
+    },
+  ]);
+
+  await emit("session_start", { type: "session_start", reason: "resume" }, ctx);
+
+  assert.deepEqual(setModelCalls, [registryModel, registryModel]);
+  assert.deepEqual(setThinkingLevelCalls, ["high"]);
+  assert.deepEqual(getStickyModel(), sticky);
+});
+
 test("session_start does nothing when no sticky model was set", async () => {
   const createExtension = await loadExtension();
   const { api, emit, setModelCalls } = createMockAPI();
@@ -330,6 +486,51 @@ test("session_shutdown clears sticky model state", async () => {
   await emit("session_shutdown", { type: "session_shutdown" }, {});
 
   assert.equal(getStickyModel(), undefined);
+});
+
+test("restore-source model selection captures the active key for shutdown without storing", async () => {
+  const createExtension = await loadExtension();
+  const { setStickyModel } = await import("../lib/sticky-model.ts");
+  const restoredSessionFile = "/sessions/restored.jsonl";
+  const otherSessionFile = "/sessions/other.jsonl";
+  const restoredSticky = { provider: "google", model: "gemini-2.5-pro" };
+  const otherSticky = { provider: "openai", model: "gpt-5.4" };
+  setStickyModel(restoredSticky, restoredSessionFile);
+  setStickyModel(otherSticky, otherSessionFile);
+
+  const { api, emit } = createMockAPI();
+  const { ui } = createMockUI();
+  const ctx = createMockContext({
+    ui,
+    sessionFile: restoredSessionFile,
+    modelRegistry: createMockModelRegistry(),
+  });
+  createExtension(api);
+
+  await emit(
+    "model_select",
+    {
+      type: "model_select",
+      model: makeModel(restoredSticky.provider, restoredSticky.model),
+      previousModel: undefined,
+      source: "restore",
+    },
+    ctx,
+  );
+
+  assert.deepEqual(getStickyModel(restoredSessionFile), restoredSticky);
+  await emit(
+    "session_shutdown",
+    { type: "session_shutdown", reason: "quit" },
+    createMockContext({
+      ui,
+      sessionFile: otherSessionFile,
+      modelRegistry: createMockModelRegistry(),
+    }),
+  );
+
+  assert.equal(getStickyModel(restoredSessionFile), undefined);
+  assert.deepEqual(getStickyModel(otherSessionFile), otherSticky);
 });
 
 test("session_shutdown clears the active session without reading stale context", async () => {
