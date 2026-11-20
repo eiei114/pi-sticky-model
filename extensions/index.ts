@@ -71,7 +71,12 @@ export default function (pi: ExtensionAPI) {
       return;
     }
 
-    const restored = await pi.setModel(model);
+    let restored = false;
+    try {
+      restored = await pi.setModel(model);
+    } catch {
+      // A rejected restore follows the same non-fatal path as a false result.
+    }
     if (restored && sticky.thinkingLevel !== undefined) {
       pi.setThinkingLevel(sticky.thinkingLevel);
     }

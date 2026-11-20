@@ -410,6 +410,86 @@ test("session_start warns when pi.setModel returns false", async () => {
   ]);
 });
 
+test("session_start warns and retries when pi.setModel rejects", async () => {
+  const createExtension = await loadExtension();
+  const { setStickyModel } = await import("../lib/sticky-model.ts");
+  const sticky = {
+    provider: "google",
+    model: "gemini-2.5-pro",
+    thinkingLevel: "high",
+  };
+  setStickyModel(sticky);
+
+  const registryModel = makeModel(sticky.provider, sticky.model);
+  let attempts = 0;
+  const { api, emit, setModelCalls, setThinkingLevelCalls } = createMockAPI({
+    setModelResult: () => {
+      if (attempts++ === 0) return Promise.reject(new Error("restore failed"));
+      return true;
+    },
+  });
+  const { ui, status, notifications } = createMockUI();
+  const ctx = createMockContext({
+    ui,
+    modelRegistry: createMockModelRegistry([registryModel]),
+  });
+
+  createExtension(api);
+
+  await emit("session_start", { type: "session_start", reason: "resume" }, ctx);
+
+  assert.deepEqual(setModelCalls, [registryModel]);
+  assert.deepEqual(setThinkingLevelCalls, []);
+  assert.deepEqual(getStickyModel(), sticky);
+  assert.equal(status.get("sticky-model"), undefined);
+  assert.deepEqual(notifications, [
+    {
+      message: "pi-sticky-model: failed to restore google/gemini-2.5-pro",
+      type: "warning",
+    },
+  ]);
+
+  await emit("session_start", { type: "session_start", reason: "resume" }, ctx);
+
+  assert.deepEqual(setModelCalls, [registryModel, registryModel]);
+  assert.deepEqual(setThinkingLevelCalls, ["high"]);
+  assert.deepEqual(getStickyModel(), sticky);
+  assert.equal(status.get("sticky-model"), "sticky: google/gemini-2.5-pro");
+  assert.equal(
+    notifications.some(
+      (notification) =>
+        notification.message === "Restored sticky model: google/gemini-2.5-pro",
+    ),
+    true,
+  );
+});
+
+test("session_start silently handles a rejected pi.setModel without UI", async () => {
+  const createExtension = await loadExtension();
+  const { setStickyModel } = await import("../lib/sticky-model.ts");
+  const sticky = { provider: "google", model: "gemini-2.5-pro" };
+  setStickyModel(sticky);
+
+  const registryModel = makeModel(sticky.provider, sticky.model);
+  const { api, emit, setModelCalls } = createMockAPI({
+    setModelResult: () => Promise.reject(new Error("restore failed")),
+  });
+  const { ui, notifications } = createMockUI();
+  const ctx = createMockContext({
+    ui,
+    modelRegistry: createMockModelRegistry([registryModel]),
+  });
+  ctx.hasUI = false;
+
+  createExtension(api);
+
+  await emit("session_start", { type: "session_start", reason: "resume" }, ctx);
+
+  assert.deepEqual(setModelCalls, [registryModel]);
+  assert.deepEqual(getStickyModel(), sticky);
+  assert.deepEqual(notifications, []);
+});
+
 test("session_start skips thinking restore after failure and keeps the value for retry", async () => {
   const createExtension = await loadExtension();
   const { setStickyModel } = await import("../lib/sticky-model.ts");
