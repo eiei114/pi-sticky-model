@@ -1,7 +1,7 @@
 /** Lightweight mock ExtensionAPI / context harness for extension hook tests. */
 
 /**
- * @param {{ setModelResult?: boolean | ((model: unknown) => boolean), thinkingLevel?: string }} [options]
+ * @param {{ setModelResult?: boolean | ((model: unknown) => boolean | Promise<boolean>), thinkingLevel?: string }} [options]
  */
 export function createMockAPI(options = {}) {
   const { setModelResult = true, thinkingLevel = "medium" } = options;
