@@ -57,12 +57,16 @@ export default function (pi: ExtensionAPI) {
       copyStickyModel(event.previousSessionFile, currentSessionKey);
     }
     const sticky = getStickyModel(currentSessionKey);
-    if (!sticky) return; // no model was ever selected, nothing to restore
+    if (!sticky) {
+      if (ctx.hasUI) ctx.ui.setStatus(STATUS_KEY, undefined);
+      return;
+    }
 
     // Find the model in the registry to get the full Model object
     const model = ctx.modelRegistry.find(sticky.provider, sticky.model);
     if (!model) {
       if (ctx.hasUI) {
+        ctx.ui.setStatus(STATUS_KEY, undefined);
         ctx.ui.notify(
           `pi-sticky-model: saved model ${sticky.provider}/${sticky.model} not found in registry, falling back to default.`,
           "warning",
@@ -88,6 +92,7 @@ export default function (pi: ExtensionAPI) {
           "info",
         );
       } else {
+        ctx.ui.setStatus(STATUS_KEY, undefined);
         ctx.ui.notify(
           `pi-sticky-model: failed to restore ${sticky.provider}/${sticky.model}`,
           "warning",
