@@ -11,6 +11,7 @@ import {
 } from "./helpers/extension-harness.mjs";
 
 const { clearStickyModel, getStickyModel } = await import("../lib/sticky-model.ts");
+const priorStatus = "sticky: anthropic/claude-sonnet-4-6";
 
 test.beforeEach(() => {
   clearStickyModel();
@@ -165,6 +166,7 @@ test("session_start restores sticky model on new, resume, and fork", async () =>
 
     const { api, emit, setModelCalls } = createMockAPI();
     const { ui, status, notifications } = createMockUI();
+    status.set("sticky-model", priorStatus);
     const ctx = createMockContext({
       ui,
       modelRegistry: createMockModelRegistry([registryModel]),
@@ -356,7 +358,8 @@ test("session_start warns when saved model is missing from registry", async () =
   setStickyModel({ provider: "google", model: "gemini-2.5-pro" });
 
   const { api, emit, setModelCalls } = createMockAPI();
-  const { ui, notifications } = createMockUI();
+  const { ui, status, notifications } = createMockUI();
+  status.set("sticky-model", priorStatus);
   const ctx = createMockContext({
     ui,
     modelRegistry: createMockModelRegistry(),
@@ -371,6 +374,8 @@ test("session_start warns when saved model is missing from registry", async () =
   );
 
   assert.deepEqual(setModelCalls, []);
+  assert.equal(status.get("sticky-model"), undefined);
+  assert.deepEqual(getStickyModel(), { provider: "google", model: "gemini-2.5-pro" });
   assert.deepEqual(notifications, [
     {
       message:
@@ -387,7 +392,8 @@ test("session_start warns when pi.setModel returns false", async () => {
 
   const registryModel = makeModel("google", "gemini-2.5-pro");
   const { api, emit, setModelCalls } = createMockAPI({ setModelResult: false });
-  const { ui, notifications } = createMockUI();
+  const { ui, status, notifications } = createMockUI();
+  status.set("sticky-model", priorStatus);
   const ctx = createMockContext({
     ui,
     modelRegistry: createMockModelRegistry([registryModel]),
@@ -402,6 +408,7 @@ test("session_start warns when pi.setModel returns false", async () => {
   );
 
   assert.deepEqual(setModelCalls, [registryModel]);
+  assert.equal(status.get("sticky-model"), undefined);
   assert.deepEqual(notifications, [
     {
       message: "pi-sticky-model: failed to restore google/gemini-2.5-pro",
@@ -429,6 +436,7 @@ test("session_start warns and retries when pi.setModel rejects", async () => {
     },
   });
   const { ui, status, notifications } = createMockUI();
+  status.set("sticky-model", priorStatus);
   const ctx = createMockContext({
     ui,
     modelRegistry: createMockModelRegistry([registryModel]),
@@ -464,30 +472,32 @@ test("session_start warns and retries when pi.setModel rejects", async () => {
   );
 });
 
-test("session_start silently handles a rejected pi.setModel without UI", async () => {
+test("session_start does not update UI on success or rejection without UI", async () => {
   const createExtension = await loadExtension();
   const { setStickyModel } = await import("../lib/sticky-model.ts");
   const sticky = { provider: "google", model: "gemini-2.5-pro" };
   setStickyModel(sticky);
 
   const registryModel = makeModel(sticky.provider, sticky.model);
-  const { api, emit, setModelCalls } = createMockAPI({
-    setModelResult: () => Promise.reject(new Error("restore failed")),
-  });
-  const { ui, notifications } = createMockUI();
-  const ctx = createMockContext({
-    ui,
-    modelRegistry: createMockModelRegistry([registryModel]),
-  });
-  ctx.hasUI = false;
+  for (const setModelResult of [true, () => Promise.reject(new Error("restore failed"))]) {
+    const { api, emit, setModelCalls } = createMockAPI({ setModelResult });
+    const { ui, status, notifications } = createMockUI();
+    status.set("sticky-model", priorStatus);
+    const ctx = createMockContext({
+      ui,
+      modelRegistry: createMockModelRegistry([registryModel]),
+    });
+    ctx.hasUI = false;
 
-  createExtension(api);
+    createExtension(api);
 
-  await emit("session_start", { type: "session_start", reason: "resume" }, ctx);
+    await emit("session_start", { type: "session_start", reason: "resume" }, ctx);
 
-  assert.deepEqual(setModelCalls, [registryModel]);
-  assert.deepEqual(getStickyModel(), sticky);
-  assert.deepEqual(notifications, []);
+    assert.deepEqual(setModelCalls, [registryModel]);
+    assert.deepEqual(getStickyModel(), sticky);
+    assert.equal(status.get("sticky-model"), priorStatus);
+    assert.deepEqual(notifications, []);
+  }
 });
 
 test("session_start skips thinking restore after failure and keeps the value for retry", async () => {
@@ -532,10 +542,11 @@ test("session_start skips thinking restore after failure and keeps the value for
   assert.deepEqual(getStickyModel(), sticky);
 });
 
-test("session_start does nothing when no sticky model was set", async () => {
+test("session_start clears the status without restoring when no sticky model was set", async () => {
   const createExtension = await loadExtension();
   const { api, emit, setModelCalls } = createMockAPI();
-  const { ui, notifications } = createMockUI();
+  const { ui, status, notifications } = createMockUI();
+  status.set("sticky-model", priorStatus);
   const ctx = createMockContext({
     ui,
     modelRegistry: createMockModelRegistry([
@@ -552,6 +563,7 @@ test("session_start does nothing when no sticky model was set", async () => {
   );
 
   assert.deepEqual(setModelCalls, []);
+  assert.equal(status.get("sticky-model"), undefined);
   assert.equal(notifications.length, 0);
 });
 
