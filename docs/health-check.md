@@ -22,7 +22,7 @@ Compatibility verification for `pi-sticky-model@0.4.13` with Pi SDK 1.5.2.
 | Check | Status | Notes |
 |-------|--------|-------|
 | `.github/workflows/ci.yml` | ✅ | `ubuntu-latest`, Node 24, `setup-bun`, `npm ci` + `npm run ci` |
-| Local `npm run ci` | ✅ | typecheck + 71 unit tests + actual Pi SDK 1.5.2 smoke (5/5) + `pack:check` pass |
+| Local `npm run ci` | ✅ | typecheck + 72 unit tests + actual Pi SDK 1.5.2 smoke (5/5) + `pack:check` pass |
 | Latest main CI (GitHub) | ✅ | Green after 0.4.2 patch release (PR #52) |
 | PR CI on recent merges | ✅ | Dependabot (#51), TypeScript 7 (#50), and maintenance PRs green before merge |
 
@@ -40,11 +40,11 @@ Compatibility verification for `pi-sticky-model@0.4.13` with Pi SDK 1.5.2.
 | File | Tests | Coverage |
 |------|-------|----------|
 | `tests/smoke.test.mjs` | 16 | Package metadata, release workflow contract, policy files, README badges, install pin, release command alignment, health-check baseline |
-| `tests/extension-hooks.test.mjs` | 22 | `model_select`, `thinking_level_select`, `session_start`, `session_shutdown` hooks, including missing-model, failed/rejected retry, reload, and in-memory-session cases |
+| `tests/extension-hooks.test.mjs` | 23 | `model_select`, `thinking_level_select`, `session_start`, `session_shutdown` hooks, including thinking-only fork inheritance, missing-model, failed/rejected retry, reload, and in-memory-session cases |
 | `tests/sticky-model.test.mjs` | 21 | `set/get/clear`, per-session isolation/copy (including inherited and non-enumerable refs), and corrupt or rebuilt `globalThis` state guards |
 | `tests/pi-sdk-smoke-contract.test.mjs` | 8 | Positive and deliberately missing RPC response assertions, temporary report storage, and path redaction |
 | `tests/release-protection.test.mjs` | 4 | Manual-only auto-release trigger, default-off authorization gates, and stable-tag baseline selection |
-| **Total** | **71** | **71 pass, 0 fail** |
+| **Total** | **72** | **72 pass, 0 fail** |
 
 ### Coverage gaps (non-trivial)
 
