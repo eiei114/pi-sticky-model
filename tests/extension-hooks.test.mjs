@@ -99,6 +99,52 @@ test("thinking_level_select stores the active model and thinking level", async (
   });
 });
 
+test("a fork restores the model and thinking level captured by a thinking-only change", async () => {
+  const createExtension = await loadExtension();
+  const { setStickyModel } = await import("../lib/sticky-model.ts");
+  const predecessorFile = "/sessions/predecessor.jsonl";
+  const forkFile = "/sessions/fork.jsonl";
+  const independentFile = "/sessions/independent.jsonl";
+  const model = makeModel("openai", "gpt-5.4");
+  const independentModel = makeModel("google", "gemini-2.5-pro");
+  setStickyModel(
+    { provider: independentModel.provider, model: independentModel.id, thinkingLevel: "low" },
+    independentFile,
+  );
+  const modelRegistry = createMockModelRegistry([model, independentModel]);
+  const predecessor = createMockAPI();
+  createExtension(predecessor.api);
+
+  await predecessor.emit(
+    "thinking_level_select",
+    { type: "thinking_level_select", level: "high", previousLevel: "medium" },
+    createMockContext({ ui: createMockUI().ui, modelRegistry, sessionFile: predecessorFile, model }),
+  );
+
+  const fork = createMockAPI();
+  createExtension(fork.api);
+  await fork.emit(
+    "session_start",
+    { type: "session_start", reason: "fork", previousSessionFile: predecessorFile },
+    createMockContext({ ui: createMockUI().ui, modelRegistry, sessionFile: forkFile }),
+  );
+
+  assert.deepEqual(fork.callLog, [
+    { method: "setModel", value: model },
+    { method: "setThinkingLevel", value: "high" },
+  ]);
+  assert.deepEqual(getStickyModel(forkFile), {
+    provider: model.provider,
+    model: model.id,
+    thinkingLevel: "high",
+  });
+  assert.deepEqual(getStickyModel(independentFile), {
+    provider: independentModel.provider,
+    model: independentModel.id,
+    thinkingLevel: "low",
+  });
+});
+
 test("thinking_level_select does not store anything when there is no active model", async () => {
   const createExtension = await loadExtension();
   const { api, emit } = createMockAPI();
