@@ -240,6 +240,64 @@ test("session_start restores sticky model on new, resume, and fork", async () =>
   }
 });
 
+test("resume restores only the target session's saved model and thinking level", async () => {
+  const createExtension = await loadExtension();
+  const { setStickyModel } = await import("../lib/sticky-model.ts");
+  const outgoingFile = "/sessions/outgoing.jsonl";
+  const targetFile = "/sessions/target.jsonl";
+  const outgoingModel = makeModel("google", "gemini-2.5-pro");
+  const targetModel = makeModel("openai", "gpt-5.4");
+  const outgoingSticky = { provider: outgoingModel.provider, model: outgoingModel.id, thinkingLevel: "low" };
+  const targetSticky = { provider: targetModel.provider, model: targetModel.id, thinkingLevel: "high" };
+  setStickyModel({ ...outgoingSticky }, outgoingFile);
+  setStickyModel({ ...targetSticky }, targetFile);
+
+  const { api, emit, callLog } = createMockAPI();
+  createExtension(api);
+  await emit(
+    "session_start",
+    { type: "session_start", reason: "resume", previousSessionFile: outgoingFile },
+    createMockContext({
+      ui: createMockUI().ui,
+      modelRegistry: createMockModelRegistry([outgoingModel, targetModel]),
+      sessionFile: targetFile,
+    }),
+  );
+
+  assert.deepEqual(callLog, [
+    { method: "setModel", value: targetModel },
+    { method: "setThinkingLevel", value: "high" },
+  ]);
+  assert.deepEqual(getStickyModel(outgoingFile), outgoingSticky);
+  assert.deepEqual(getStickyModel(targetFile), targetSticky);
+});
+
+test("resume without a saved selection does not inherit the outgoing session's selection", async () => {
+  const createExtension = await loadExtension();
+  const { setStickyModel } = await import("../lib/sticky-model.ts");
+  const outgoingFile = "/sessions/outgoing.jsonl";
+  const targetFile = "/sessions/target.jsonl";
+  const outgoingModel = makeModel("google", "gemini-2.5-pro");
+  const outgoingSticky = { provider: outgoingModel.provider, model: outgoingModel.id, thinkingLevel: "low" };
+  setStickyModel({ ...outgoingSticky }, outgoingFile);
+
+  const { api, emit, callLog } = createMockAPI();
+  createExtension(api);
+  await emit(
+    "session_start",
+    { type: "session_start", reason: "resume", previousSessionFile: outgoingFile },
+    createMockContext({
+      ui: createMockUI().ui,
+      modelRegistry: createMockModelRegistry([outgoingModel]),
+      sessionFile: targetFile,
+    }),
+  );
+
+  assert.deepEqual(callLog, []);
+  assert.equal(getStickyModel(targetFile), undefined);
+  assert.deepEqual(getStickyModel(outgoingFile), outgoingSticky);
+});
+
 test("session_start restores the current model on reload", async () => {
   const createExtension = await loadExtension();
   const { setStickyModel } = await import("../lib/sticky-model.ts");
